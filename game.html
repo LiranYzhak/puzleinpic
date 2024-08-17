@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>משחק חידתמונה של לירן יצחק</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="welcome-screen">
+            <h1>ברוכים הבאים למשחק חידתמונה של לירן יצחק – נפלאות הבינה המלאכותית</h1>
+            <p>המשחק שבו תצטרכו לנחש מה הביטוי או ההגיג הלשוני המסתתרים מאחורי התמונה</p>
+            <button id="start-game">התחל</button>
+        </div>
+        <div id="game-screen" style="display: none;">
+            <img id="current-image" src="" alt="תמונת חידה">
+            <div id="guess-container"></div>
+            <div id="letters-container"></div>
+            <button id="hint-button">תן רמז</button>
+            <button id="next-image" style="display: none;">עבור לתמונה הבאה</button>
+            <div id="score">ניקוד: <span id="score-value">0</span></div>
+        </div>
+        <div id="end-screen" style="display: none;">
+            <h2>אלוף, ניצחת את המשחק!</h2>
+            <button id="finish-game">סיים</button>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
