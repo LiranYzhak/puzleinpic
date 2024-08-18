@@ -35,17 +35,25 @@ function initializeGame() {
     document.getElementById('mute-toggle').addEventListener('click', toggleMute);
     checkSavedTheme();
     initBackgroundMusic();
+    loadGameState();
 }
 
 function initBackgroundMusic() {
     backgroundMusic = document.getElementById('background-music');
-    backgroundMusic.volume = 0.5; // Set initial volume to 50%
+    backgroundMusic.volume = 0.5;
 }
 
 function startGame() {
     document.getElementById('welcome-screen').style.display = 'none';
     document.getElementById('game-screen').style.display = 'block';
-    loadRandomImage();
+    if (usedImages.size === 0) {
+        loadRandomImage();
+    } else {
+        updateGuessContainer();
+        generateLetters();
+        updateImageCounter();
+        startTimer();
+    }
     playBackgroundMusic();
 }
 
@@ -57,6 +65,7 @@ function toggleMute() {
     isMuted = !isMuted;
     backgroundMusic.muted = isMuted;
     document.getElementById('mute-toggle').textContent = isMuted ? 'הפעל מוזיקה' : 'השתק מוזיקה';
+    saveGameState();
 }
 
 function loadRandomImage() {
@@ -82,6 +91,7 @@ function loadRandomImage() {
     document.getElementById('next-image').style.display = 'none';
     updateImageCounter();
     startTimer();
+    saveGameState();
 }
 
 function startTimer() {
@@ -94,6 +104,7 @@ function startTimer() {
         if (timeLeft <= 0) {
             clearInterval(timer);
         }
+        saveGameState();
     }, 1000);
 }
 
@@ -153,6 +164,7 @@ function handleLetterClick(letter) {
     if (emptyIndex !== -1) {
         guessedPhrase[emptyIndex] = letter;
         updateGuessContainer();
+        saveGameState();
     }
 }
 
@@ -160,6 +172,7 @@ function removeLetter(index) {
     if (guessedPhrase[index] !== null) {
         guessedPhrase[index] = null;
         updateGuessContainer();
+        saveGameState();
     }
 }
 
@@ -172,11 +185,12 @@ function checkAnswer() {
         letterBoxes.forEach(box => box.classList.add('correct-answer'));
         score += 100;
         if (timeLeft > 0) {
-            score += 50;  // בונוס אם נפתר בפחות מ-60 שניות
+            score += 50;
         }
         totalTime += (60 - timeLeft);
         document.getElementById('score-value').textContent = score;
         document.getElementById('next-image').style.display = 'inline-block';
+        saveGameState();
     } else if (guessedWord.length === currentPhrase.length) {
         letterBoxes.forEach(box => box.classList.add('incorrect-answer'));
     } else {
@@ -199,6 +213,7 @@ function giveHint() {
             score -= 50;
             hintsUsed++;
             document.getElementById('score-value').textContent = score;
+            saveGameState();
         }
     }
 }
@@ -219,6 +234,7 @@ function endGame() {
     
     backgroundMusic.pause();
     backgroundMusic.currentTime = 0;
+    saveGameState();
 }
 
 function resetGame() {
@@ -230,6 +246,7 @@ function resetGame() {
     document.getElementById('score-value').textContent = score;
     document.getElementById('end-screen').style.display = 'none';
     document.getElementById('welcome-screen').style.display = 'block';
+    clearGameState();
     playBackgroundMusic();
 }
 
@@ -245,6 +262,57 @@ function checkSavedTheme() {
         isDarkMode = JSON.parse(savedDarkMode);
         document.body.classList.toggle('dark-mode', isDarkMode);
     }
+}
+
+function saveGameState() {
+    const gameState = {
+        currentImageIndex,
+        currentPhrase,
+        guessedPhrase,
+        score,
+        usedImages: Array.from(usedImages),
+        timeLeft,
+        hintsUsed,
+        totalTime,
+        isDarkMode,
+        isMuted
+    };
+    localStorage.setItem('gameState', JSON.stringify(gameState));
+}
+
+function loadGameState() {
+    const savedState = localStorage.getItem('gameState');
+    if (savedState) {
+        const gameState = JSON.parse(savedState);
+        currentImageIndex = gameState.currentImageIndex;
+        currentPhrase = gameState.currentPhrase;
+        guessedPhrase = gameState.guessedPhrase;
+        score = gameState.score;
+        usedImages = new Set(gameState.usedImages);
+        timeLeft = gameState.timeLeft;
+        hintsUsed = gameState.hintsUsed;
+        totalTime = gameState.totalTime;
+        isDarkMode = gameState.isDarkMode;
+        isMuted = gameState.isMuted;
+
+        document.getElementById('score-value').textContent = score;
+        if (usedImages.size > 0) {
+            document.getElementById('welcome-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            const imageData = gameData[currentImageIndex];
+            document.getElementById('current-image').src = imageData.image;
+            updateGuessContainer();
+            generateLetters();
+            updateImageCounter();
+            startTimer();
+        }
+        backgroundMusic.muted = isMuted;
+        document.getElementById('mute-toggle').textContent = isMuted ? 'הפעל מוזיקה' : 'השתק מוזיקה';
+    }
+}
+
+function clearGameState() {
+    localStorage.removeItem('gameState');
 }
 
 window.addEventListener('load', loadGameData);
