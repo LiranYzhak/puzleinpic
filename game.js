@@ -72,12 +72,13 @@ function updateGuessContainer() {
             wordIndex++;
         }
         const box = document.createElement('div');
-        box.className = guessedPhrase[index] ? 'answer-box' : 'letter-box';
+        box.className = 'letter-box';
         box.textContent = guessedPhrase[index] || '';
         box.addEventListener('click', () => removeLetter(index));
         container.appendChild(box);
         wordIndex++;
     });
+    checkAnswer();
 }
 
 function generateLetters() {
@@ -107,7 +108,6 @@ function handleLetterClick(letter) {
     if (emptyIndex !== -1) {
         guessedPhrase[emptyIndex] = letter;
         updateGuessContainer();
-        checkAnswer();
     }
 }
 
@@ -119,10 +119,20 @@ function removeLetter(index) {
 }
 
 function checkAnswer() {
-    if (guessedPhrase.join('') === currentPhrase) {
+    const guessedWord = guessedPhrase.join('');
+    const letterBoxes = document.querySelectorAll('#guess-container .letter-box');
+    
+    if (guessedWord === currentPhrase) {
+        letterBoxes.forEach(box => box.classList.add('correct-answer'));
         score += 100;
         document.getElementById('score-value').textContent = score;
         document.getElementById('next-image').style.display = 'inline-block';
+    } else if (guessedWord.length === currentPhrase.length) {
+        letterBoxes.forEach(box => box.classList.add('incorrect-answer'));
+    } else {
+        letterBoxes.forEach(box => {
+            box.classList.remove('correct-answer', 'incorrect-answer');
+        });
     }
 }
 
@@ -138,7 +148,6 @@ function giveHint() {
             updateGuessContainer();
             score -= 50;
             document.getElementById('score-value').textContent = score;
-            checkAnswer();
         }
     }
 }

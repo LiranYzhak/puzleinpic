@@ -43,6 +43,7 @@ body {
     height: 30px;
     border: 2px solid #3498db;
     background-color: white;
+    color: black;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -51,18 +52,16 @@ body {
     cursor: pointer;
 }
 
-.answer-box {
-    width: 30px;
-    height: 30px;
-    border: 2px solid #2ecc71;
+.correct-answer {
     background-color: #2ecc71;
+    border-color: #2ecc71;
     color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 20px;
-    font-weight: bold;
-    cursor: pointer;
+}
+
+.incorrect-answer {
+    background-color: #e74c3c;
+    border-color: #e74c3c;
+    color: white;
 }
 
 #letters-container {
