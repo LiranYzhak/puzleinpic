@@ -14,16 +14,17 @@
             <button id="start-game">התחל</button>
         </div>
         <div id="game-screen" style="display: none;">
+            <div id="image-counter"></div>
             <img id="current-image" src="" alt="תמונת חידה">
             <div id="guess-container"></div>
             <div id="letters-container"></div>
-            <button id="hint-button">תן רמז</button>
-            <button id="next-image" style="display: none;">עבור לתמונה הבאה</button>
+            <button id="hint-button">רמז</button>
+            <button id="next-image" style="display: none;">תמונה הבאה</button>
             <div id="score">ניקוד: <span id="score-value">0</span></div>
         </div>
         <div id="end-screen" style="display: none;">
-            <h2>אלוף, ניצחת את המשחק!</h2>
-            <button id="finish-game">סיים</button>
+            <h2>כל הכבוד, סיימת את המשחק!</h2>
+            <button id="finish-game">התחל מחדש</button>
         </div>
     </div>
     <script src="game.js"></script>
