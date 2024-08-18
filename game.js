@@ -28,12 +28,13 @@ function loadGameData() {
 
 function initializeGame() {
     document.getElementById('start-game').addEventListener('click', startGame);
-    document.getElementById('hint-button').addEventListener('click', giveHint);
+    document.getElementById('reveal-letter').addEventListener('click', revealLetter);
     document.getElementById('next-image').addEventListener('click', nextImage);
     document.getElementById('skip-image').addEventListener('click', skipImage);
     document.getElementById('finish-game').addEventListener('click', resetGame);
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     document.getElementById('mute-toggle').addEventListener('click', toggleMute);
+    document.getElementById('reset-game').addEventListener('click', confirmResetGame);
     checkSavedTheme();
     initBackgroundMusic();
     loadGameState();
@@ -205,7 +206,7 @@ function checkAnswer() {
     }
 }
 
-function giveHint() {
+function revealLetter() {
     if (score >= 50) {
         const emptyIndices = guessedPhrase.reduce((acc, letter, index) => {
             if (letter === null) acc.push(index);
@@ -220,6 +221,8 @@ function giveHint() {
             document.getElementById('score-value').textContent = score;
             saveGameState();
         }
+    } else {
+        alert('אין מספיק נקודות לחשיפת אות');
     }
 }
 
@@ -264,6 +267,12 @@ function resetGame() {
     document.getElementById('welcome-screen').style.display = 'block';
     clearGameState();
     playBackgroundMusic();
+}
+
+function confirmResetGame() {
+    if (confirm('האם אתה בטוח שברצונך לאפס את המשחק? כל ההתקדמות תאבד.')) {
+        resetGame();
+    }
 }
 
 function toggleTheme() {

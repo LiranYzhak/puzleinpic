@@ -124,6 +124,27 @@ body {
     margin-bottom: 20px;
 }
 
+#game-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+#game-controls button {
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: var(--button-bg);
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+#game-controls button:hover {
+    background-color: var(--button-hover);
+}
+
 button {
     background-color: var(--button-bg);
     color: white;
