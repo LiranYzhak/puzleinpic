@@ -5,13 +5,15 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #f0f0f0;
+    background-image: url('background.png');
+    background-size: cover;
+    background-position: center;
     direction: rtl;
 }
 
 #game-container {
     text-align: center;
-    background-color: white;
+    background-color: rgba(255, 255, 255, 0.9);
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
@@ -22,6 +24,13 @@ body {
 #image-counter {
     font-size: 18px;
     margin-bottom: 10px;
+}
+
+#timer {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #3498db;
 }
 
 #current-image {
@@ -90,4 +99,21 @@ button:hover {
 #score {
     font-size: 18px;
     margin-top: 20px;
+}
+
+#end-image {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+#stats {
+    background-color: #f0f0f0;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+#stats h3 {
+    margin-top: 0;
 }

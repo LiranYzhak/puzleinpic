@@ -5,6 +5,10 @@ let score = 0;
 let gameData = [];
 let availableLetters = [];
 let usedImages = new Set();
+let timer;
+let timeLeft;
+let hintsUsed = 0;
+let totalTime = 0;
 
 function loadGameData() {
     fetch('game_data.csv')
@@ -54,6 +58,24 @@ function loadRandomImage() {
     generateLetters();
     document.getElementById('next-image').style.display = 'none';
     updateImageCounter();
+    startTimer();
+}
+
+function startTimer() {
+    clearInterval(timer);
+    timeLeft = 60;
+    updateTimerDisplay();
+    timer = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+        }
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    document.getElementById('timer').textContent = timeLeft;
 }
 
 function updateImageCounter() {
@@ -123,8 +145,13 @@ function checkAnswer() {
     const letterBoxes = document.querySelectorAll('#guess-container .letter-box');
     
     if (guessedWord === currentPhrase) {
+        clearInterval(timer);
         letterBoxes.forEach(box => box.classList.add('correct-answer'));
         score += 100;
+        if (timeLeft > 0) {
+            score += 50;  // בונוס אם נפתר בפחות מ-60 שניות
+        }
+        totalTime += (60 - timeLeft);
         document.getElementById('score-value').textContent = score;
         document.getElementById('next-image').style.display = 'inline-block';
     } else if (guessedWord.length === currentPhrase.length) {
@@ -147,6 +174,7 @@ function giveHint() {
             guessedPhrase[hintIndex] = currentPhrase[hintIndex];
             updateGuessContainer();
             score -= 50;
+            hintsUsed++;
             document.getElementById('score-value').textContent = score;
         }
     }
@@ -157,17 +185,25 @@ function nextImage() {
 }
 
 function endGame() {
+    clearInterval(timer);
     document.getElementById('game-screen').style.display = 'none';
     document.getElementById('end-screen').style.display = 'block';
+    
+    document.getElementById('final-score').textContent = score;
+    document.getElementById('hints-used').textContent = hintsUsed;
+    const averageTime = (totalTime / usedImages.size).toFixed(2);
+    document.getElementById('average-time').textContent = averageTime;
 }
 
 function resetGame() {
     currentImageIndex = 0;
     score = 0;
+    hintsUsed = 0;
+    totalTime = 0;
     usedImages.clear();
     document.getElementById('score-value').textContent = score;
     document.getElementById('end-screen').style.display = 'none';
-    startGame();
+    document.getElementById('welcome-screen').style.display = 'block';
 }
 
 window.addEventListener('load', loadGameData);
