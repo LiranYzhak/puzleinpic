@@ -30,6 +30,7 @@ function initializeGame() {
     document.getElementById('start-game').addEventListener('click', startGame);
     document.getElementById('hint-button').addEventListener('click', giveHint);
     document.getElementById('next-image').addEventListener('click', nextImage);
+    document.getElementById('skip-image').addEventListener('click', skipImage);
     document.getElementById('finish-game').addEventListener('click', resetGame);
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     document.getElementById('mute-toggle').addEventListener('click', toggleMute);
@@ -58,7 +59,9 @@ function startGame() {
 }
 
 function playBackgroundMusic() {
-    backgroundMusic.play().catch(e => console.error("Error playing audio:", e));
+    if (!isMuted) {
+        backgroundMusic.play().catch(e => console.error("Error playing audio:", e));
+    }
 }
 
 function toggleMute() {
@@ -89,6 +92,7 @@ function loadRandomImage() {
     updateGuessContainer();
     generateLetters();
     document.getElementById('next-image').style.display = 'none';
+    document.getElementById('skip-image').style.display = 'inline-block';
     updateImageCounter();
     startTimer();
     saveGameState();
@@ -190,6 +194,7 @@ function checkAnswer() {
         totalTime += (60 - timeLeft);
         document.getElementById('score-value').textContent = score;
         document.getElementById('next-image').style.display = 'inline-block';
+        document.getElementById('skip-image').style.display = 'none';
         saveGameState();
     } else if (guessedWord.length === currentPhrase.length) {
         letterBoxes.forEach(box => box.classList.add('incorrect-answer'));
@@ -220,6 +225,17 @@ function giveHint() {
 
 function nextImage() {
     loadRandomImage();
+}
+
+function skipImage() {
+    if (score >= 50) {
+        score -= 50;
+        document.getElementById('score-value').textContent = score;
+        loadRandomImage();
+        saveGameState();
+    } else {
+        alert('אין מספיק נקודות לדילוג על תמונה');
+    }
 }
 
 function endGame() {
@@ -305,9 +321,13 @@ function loadGameState() {
             generateLetters();
             updateImageCounter();
             startTimer();
+            document.getElementById('skip-image').style.display = 'inline-block';
         }
         backgroundMusic.muted = isMuted;
         document.getElementById('mute-toggle').textContent = isMuted ? 'הפעל מוזיקה' : 'השתק מוזיקה';
+        if (!isMuted) {
+            playBackgroundMusic();
+        }
     }
 }
 
