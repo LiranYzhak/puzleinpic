@@ -8,9 +8,12 @@
 </head>
 <body>
     <div id="game-container">
+        <button id="theme-toggle">החלף מצב תצוגה</button>
+        <button id="mute-toggle">השתק/הפעל מוזיקה</button>
         <div id="welcome-screen">
-            <h1>ברוכים הבאים למשחק חידתמונה</h1>
+            <h1>ברוכים הבאים למשחק חידתמונה של לירן יצחק – נפלאות הבינה המלאכותית</h1>
             <p>המשחק שבו תצטרכו לנחש מה הביטוי או ההגיג הלשוני המסתתרים מאחורי התמונה</p>
+            <p class="rules">פתרון חידה יזכה אותך ב-100 נקודות, פתרון חידה בזמן הקצוב יוסיף למאזנך עוד 50 נקודות. שימוש ברמז שחושף אות אחת מהתשובה יפחית מהמאזן 50 נקודות.</p>
             <button id="start-game">התחל</button>
         </div>
         <div id="game-screen" style="display: none;">
@@ -35,6 +38,10 @@
             <button id="finish-game">התחל מחדש</button>
         </div>
     </div>
+    <audio id="background-music" loop>
+        <source src="bgmusic.mp3" type="audio/mpeg">
+        הדפדפן שלך לא תומך בתג האודיו.
+    </audio>
     <script src="game.js"></script>
 </body>
 </html>

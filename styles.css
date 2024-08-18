@@ -1,3 +1,23 @@
+:root {
+    --bg-color: #f0f0f0;
+    --text-color: #333;
+    --container-bg: rgba(255, 255, 255, 0.9);
+    --button-bg: #3498db;
+    --button-hover: #2980b9;
+    --correct-answer: #2ecc71;
+    --incorrect-answer: #e74c3c;
+}
+
+body.dark-mode {
+    --bg-color: #333;
+    --text-color: #f0f0f0;
+    --container-bg: rgba(0, 0, 0, 0.8);
+    --button-bg: #2980b9;
+    --button-hover: #3498db;
+    --correct-answer: #27ae60;
+    --incorrect-answer: #c0392b;
+}
+
 body {
     font-family: Arial, sans-serif;
     display: flex;
@@ -9,16 +29,39 @@ body {
     background-size: cover;
     background-position: center;
     direction: rtl;
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
 }
 
 #game-container {
     text-align: center;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: var(--container-bg);
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     max-width: 500px;
     width: 100%;
+    position: relative;
+}
+
+#theme-toggle, #mute-toggle {
+    position: absolute;
+    top: 10px;
+    background-color: var(--button-bg);
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#theme-toggle {
+    right: 10px;
+}
+
+#mute-toggle {
+    left: 10px;
 }
 
 #image-counter {
@@ -30,7 +73,7 @@ body {
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 10px;
-    color: #3498db;
+    color: var(--button-bg);
 }
 
 #current-image {
@@ -50,9 +93,9 @@ body {
 .letter-box {
     width: 30px;
     height: 30px;
-    border: 2px solid #3498db;
-    background-color: white;
-    color: black;
+    border: 2px solid var(--button-bg);
+    background-color: var(--container-bg);
+    color: var(--text-color);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -62,14 +105,14 @@ body {
 }
 
 .correct-answer {
-    background-color: #2ecc71;
-    border-color: #2ecc71;
+    background-color: var(--correct-answer);
+    border-color: var(--correct-answer);
     color: white;
 }
 
 .incorrect-answer {
-    background-color: #e74c3c;
-    border-color: #e74c3c;
+    background-color: var(--incorrect-answer);
+    border-color: var(--incorrect-answer);
     color: white;
 }
 
@@ -82,7 +125,7 @@ body {
 }
 
 button {
-    background-color: #3498db;
+    background-color: var(--button-bg);
     color: white;
     border: none;
     padding: 10px 20px;
@@ -93,7 +136,7 @@ button {
 }
 
 button:hover {
-    background-color: #2980b9;
+    background-color: var(--button-hover);
 }
 
 #score {
@@ -108,7 +151,7 @@ button:hover {
 }
 
 #stats {
-    background-color: #f0f0f0;
+    background-color: var(--bg-color);
     padding: 15px;
     border-radius: 5px;
     margin-top: 20px;
@@ -116,4 +159,12 @@ button:hover {
 
 #stats h3 {
     margin-top: 0;
+}
+
+.rules {
+    background-color: var(--bg-color);
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 20px;
+    font-style: italic;
 }

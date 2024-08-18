@@ -9,6 +9,9 @@ let timer;
 let timeLeft;
 let hintsUsed = 0;
 let totalTime = 0;
+let isDarkMode = false;
+let isMuted = false;
+let backgroundMusic;
 
 function loadGameData() {
     fetch('game_data.csv')
@@ -28,12 +31,32 @@ function initializeGame() {
     document.getElementById('hint-button').addEventListener('click', giveHint);
     document.getElementById('next-image').addEventListener('click', nextImage);
     document.getElementById('finish-game').addEventListener('click', resetGame);
+    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+    document.getElementById('mute-toggle').addEventListener('click', toggleMute);
+    checkSavedTheme();
+    initBackgroundMusic();
+}
+
+function initBackgroundMusic() {
+    backgroundMusic = document.getElementById('background-music');
+    backgroundMusic.volume = 0.5; // Set initial volume to 50%
 }
 
 function startGame() {
     document.getElementById('welcome-screen').style.display = 'none';
     document.getElementById('game-screen').style.display = 'block';
     loadRandomImage();
+    playBackgroundMusic();
+}
+
+function playBackgroundMusic() {
+    backgroundMusic.play().catch(e => console.error("Error playing audio:", e));
+}
+
+function toggleMute() {
+    isMuted = !isMuted;
+    backgroundMusic.muted = isMuted;
+    document.getElementById('mute-toggle').textContent = isMuted ? 'הפעל מוזיקה' : 'השתק מוזיקה';
 }
 
 function loadRandomImage() {
@@ -193,6 +216,9 @@ function endGame() {
     document.getElementById('hints-used').textContent = hintsUsed;
     const averageTime = (totalTime / usedImages.size).toFixed(2);
     document.getElementById('average-time').textContent = averageTime;
+    
+    backgroundMusic.pause();
+    backgroundMusic.currentTime = 0;
 }
 
 function resetGame() {
@@ -204,6 +230,21 @@ function resetGame() {
     document.getElementById('score-value').textContent = score;
     document.getElementById('end-screen').style.display = 'none';
     document.getElementById('welcome-screen').style.display = 'block';
+    playBackgroundMusic();
+}
+
+function toggleTheme() {
+    isDarkMode = !isDarkMode;
+    document.body.classList.toggle('dark-mode', isDarkMode);
+    localStorage.setItem('darkMode', isDarkMode);
+}
+
+function checkSavedTheme() {
+    const savedDarkMode = localStorage.getItem('darkMode');
+    if (savedDarkMode !== null) {
+        isDarkMode = JSON.parse(savedDarkMode);
+        document.body.classList.toggle('dark-mode', isDarkMode);
+    }
 }
 
 window.addEventListener('load', loadGameData);
