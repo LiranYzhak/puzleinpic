@@ -38,6 +38,7 @@ function initializeGame() {
     checkSavedTheme();
     initBackgroundMusic();
     loadGameState();
+    initializeCopyrightModal();
 }
 
 function initBackgroundMusic() {
@@ -155,13 +156,23 @@ function generateLetters() {
 
     const lettersContainer = document.getElementById('letters-container');
     lettersContainer.innerHTML = '';
-    availableLetters.forEach(letter => {
-        const letterBox = document.createElement('div');
-        letterBox.className = 'letter-box';
-        letterBox.textContent = letter;
-        letterBox.addEventListener('click', () => handleLetterClick(letter));
-        lettersContainer.appendChild(letterBox);
-    });
+    
+    // יצירת שתי שורות של אותיות
+    for (let row = 0; row < 2; row++) {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'letter-row';
+        for (let i = 0; i < 7; i++) {
+            const letterIndex = row * 7 + i;
+            if (letterIndex < availableLetters.length) {
+                const letterBox = document.createElement('div');
+                letterBox.className = 'letter-box';
+                letterBox.textContent = availableLetters[letterIndex];
+                letterBox.addEventListener('click', () => handleLetterClick(availableLetters[letterIndex]));
+                rowDiv.appendChild(letterBox);
+            }
+        }
+        lettersContainer.appendChild(rowDiv);
+    }
 }
 
 function handleLetterClick(letter) {
@@ -272,6 +283,8 @@ function resetGame() {
 function confirmResetGame() {
     if (confirm('האם אתה בטוח שברצונך לאפס את המשחק? כל ההתקדמות תאבד.')) {
         resetGame();
+        // מבצע רענון של הדף
+        window.location.reload();
     }
 }
 
@@ -342,6 +355,26 @@ function loadGameState() {
 
 function clearGameState() {
     localStorage.removeItem('gameState');
+}
+
+function initializeCopyrightModal() {
+    const modal = document.getElementById('copyright-modal');
+    const btn = document.getElementById('copyright-info');
+    const span = document.getElementsByClassName('close')[0];
+
+    btn.onclick = function() {
+        modal.style.display = "block";
+    }
+
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
 }
 
 window.addEventListener('load', loadGameData);
