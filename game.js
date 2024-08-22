@@ -96,7 +96,7 @@ function loadRandomImage() {
     updateGuessContainer();
     generateLetters();
     document.getElementById('next-image').style.display = 'none';
-    document.getElementById('skip-image').style.display = 'inline-block';
+    updateSkipButtonVisibility();
     updateImageCounter();
     startTimer();
     saveGameState();
@@ -207,7 +207,7 @@ function checkAnswer() {
         totalTime += (60 - timeLeft);
         document.getElementById('score-value').textContent = score;
         document.getElementById('next-image').style.display = 'inline-block';
-        document.getElementById('skip-image').style.display = 'none';
+        updateSkipButtonVisibility();
         saveGameState();
     } else if (guessedWord.length === currentPhrase.length) {
         letterBoxes.forEach(box => box.classList.add('incorrect-answer'));
@@ -231,6 +231,7 @@ function revealLetter() {
             score -= 50;
             hintsUsed++;
             document.getElementById('score-value').textContent = score;
+            updateSkipButtonVisibility();
             saveGameState();
         }
     } else {
@@ -247,9 +248,19 @@ function skipImage() {
         score -= 50;
         document.getElementById('score-value').textContent = score;
         loadRandomImage();
+        updateSkipButtonVisibility();
         saveGameState();
     } else {
         showCustomAlert('אין מספיק נקודות לדילוג על תמונה');
+    }
+}
+
+function updateSkipButtonVisibility() {
+    const skipButton = document.getElementById('skip-image');
+    if (score >= 50) {
+        skipButton.style.display = 'inline-block';
+    } else {
+        skipButton.style.display = 'none';
     }
 }
 
@@ -349,7 +360,7 @@ function loadGameState() {
             generateLetters();
             updateImageCounter();
             startTimer();
-            document.getElementById('skip-image').style.display = 'inline-block';
+            updateSkipButtonVisibility();
         }
         backgroundMusic.muted = isMuted;
         document.getElementById('mute-toggle').textContent = isMuted ? 'הפעל מוזיקה' : 'השתק מוזיקה';
@@ -391,6 +402,7 @@ function checkSecretBonus() {
         document.getElementById('score-value').textContent = score;
         showCustomAlert('גילית את הבונוס הנסתר! קיבלת 1000 נקודות בונוס!');
         bonusAwarded = true;
+        updateSkipButtonVisibility();
         saveGameState();
     }
 }
