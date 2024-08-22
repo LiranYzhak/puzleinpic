@@ -12,7 +12,6 @@ let totalTime = 0;
 let isDarkMode = false;
 let isMuted = false;
 let backgroundMusic;
-let copyrightClickCount = 0;
 
 function loadGameData() {
     fetch('game_data.csv')
@@ -158,6 +157,7 @@ function generateLetters() {
     const lettersContainer = document.getElementById('letters-container');
     lettersContainer.innerHTML = '';
     
+    // יצירת שתי שורות של אותיות
     for (let row = 0; row < 2; row++) {
         const rowDiv = document.createElement('div');
         rowDiv.className = 'letter-row';
@@ -273,7 +273,6 @@ function resetGame() {
     hintsUsed = 0;
     totalTime = 0;
     usedImages.clear();
-    copyrightClickCount = 0;
     document.getElementById('score-value').textContent = score;
     document.getElementById('end-screen').style.display = 'none';
     document.getElementById('welcome-screen').style.display = 'block';
@@ -284,6 +283,7 @@ function resetGame() {
 function confirmResetGame() {
     if (confirm('האם אתה בטוח שברצונך לאפס את המשחק? כל ההתקדמות תאבד.')) {
         resetGame();
+        // מבצע רענון של הדף
         window.location.reload();
     }
 }
@@ -313,8 +313,7 @@ function saveGameState() {
         hintsUsed,
         totalTime,
         isDarkMode,
-        isMuted,
-        copyrightClickCount
+        isMuted
     };
     localStorage.setItem('gameState', JSON.stringify(gameState));
 }
@@ -333,7 +332,6 @@ function loadGameState() {
         totalTime = gameState.totalTime;
         isDarkMode = gameState.isDarkMode;
         isMuted = gameState.isMuted;
-        copyrightClickCount = gameState.copyrightClickCount || 0;
 
         document.getElementById('score-value').textContent = score;
         if (usedImages.size > 0) {
@@ -366,8 +364,6 @@ function initializeCopyrightModal() {
 
     btn.onclick = function() {
         modal.style.display = "block";
-        copyrightClickCount++;
-        checkSecretBonus();
     }
 
     span.onclick = function() {
@@ -378,16 +374,6 @@ function initializeCopyrightModal() {
         if (event.target == modal) {
             modal.style.display = "none";
         }
-    }
-}
-
-function checkSecretBonus() {
-    if (copyrightClickCount === 10) {
-        score += 1000;
-        document.getElementById('score-value').textContent = score;
-        alert('גילית את הבונוס הנסתר! קיבלת 1000 נקודות בונוס!');
-        copyrightClickCount = 0;
-        saveGameState();
     }
 }
 

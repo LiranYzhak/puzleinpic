@@ -23,12 +23,11 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    height: 100vh;
     margin: 0;
     background-image: url('background.png');
     background-size: cover;
     background-position: center;
-    background-attachment: fixed;
     direction: rtl;
     color: var(--text-color);
     transition: background-color 0.3s, color 0.3s;
@@ -40,10 +39,9 @@ body {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    max-width: 90%;
-    width: 500px;
+    max-width: 500px;
+    width: 100%;
     position: relative;
-    margin: 20px auto;
 }
 
 #theme-toggle, #mute-toggle {
@@ -56,7 +54,6 @@ body {
     font-size: 12px;
     cursor: pointer;
     border-radius: 5px;
-    z-index: 10;
 }
 
 #theme-toggle {
@@ -68,7 +65,7 @@ body {
 }
 
 #image-counter {
-    font-size: 16px;
+    font-size: 18px;
     margin-bottom: 10px;
 }
 
@@ -84,15 +81,12 @@ body {
     height: auto;
     border-radius: 10px;
     margin-bottom: 20px;
-    max-height: 300px;
-    object-fit: contain;
 }
 
 #guess-container {
     display: flex;
-    flex-wrap: wrap;
     justify-content: center;
-    gap: 5px;
+    gap: 10px;
     margin-bottom: 20px;
 }
 
@@ -100,15 +94,14 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 5px;
+    gap: 10px;
     margin-bottom: 20px;
 }
 
 .letter-row {
     display: flex;
     justify-content: center;
-    gap: 5px;
-    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .letter-box {
@@ -120,7 +113,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: bold;
     cursor: pointer;
 }
@@ -139,7 +132,6 @@ body {
 
 #game-controls {
     display: flex;
-    flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
     margin-top: 20px;
@@ -147,14 +139,12 @@ body {
 
 #game-controls button {
     padding: 10px 15px;
-    font-size: 14px;
+    font-size: 16px;
     cursor: pointer;
     background-color: var(--button-bg);
     color: white;
     border: none;
     border-radius: 5px;
-    flex-grow: 1;
-    max-width: 150px;
 }
 
 #game-controls button:hover {
@@ -185,8 +175,6 @@ button:hover {
     max-width: 100%;
     height: auto;
     margin-bottom: 20px;
-    max-height: 300px;
-    object-fit: contain;
 }
 
 #stats {
@@ -209,7 +197,7 @@ button:hover {
 }
 
 #copyright-info {
-    position: fixed;
+    position: absolute;
     bottom: 10px;
     right: 10px;
     font-size: 12px;
@@ -219,13 +207,12 @@ button:hover {
     padding: 5px 10px;
     cursor: pointer;
     border-radius: 5px;
-    z-index: 1000;
 }
 
 .modal {
     display: none;
     position: fixed;
-    z-index: 1001;
+    z-index: 1;
     left: 0;
     top: 0;
     width: 100%;
@@ -246,7 +233,7 @@ button:hover {
 
 .close {
     color: #aaa;
-    float: left;
+    float: right;
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
@@ -275,12 +262,13 @@ button:hover {
 }
 
 h1 {
-    font-size: 2em;
+    font-size: 2.5em;
     margin-bottom: 20px;
 }
 
 @media (max-width: 600px) {
     #game-container {
+        width: 95%;
         padding: 10px;
     }
     
@@ -292,36 +280,6 @@ h1 {
     .letter-box {
         width: 25px;
         height: 25px;
-        font-size: 14px;
-    }
-
-    h1 {
-        font-size: 1.5em;
-    }
-
-    #timer {
-        font-size: 20px;
-    }
-
-    #image-counter {
-        font-size: 14px;
-    }
-
-    #game-controls button {
-        font-size: 12px;
-        padding: 8px 12px;
-    }
-}
-
-@media (max-width: 400px) {
-    .letter-box {
-        width: 20px;
-        height: 20px;
-        font-size: 12px;
-    }
-
-    #game-controls button {
-        font-size: 11px;
-        padding: 6px 10px;
+        font-size: 16px;
     }
 }

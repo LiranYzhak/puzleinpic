@@ -3,23 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>חידתמונה</title>
+    <title>משחק חידתמונה של לירן יצחק</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div id="game-container">
         <button id="theme-toggle">החלף מצב תצוגה</button>
         <button id="mute-toggle">השתק/הפעל מוזיקה</button>
-
         <div id="welcome-screen">
             <h1>ברוכים הבאים למשחק <span class="highlight">חידתמונה</span></h1>
             <p>המשחק שבו תצטרכו לנחש מה הביטוי או ההגיג הלשוני המסתתרים מאחורי התמונה</p>
-            <div class="rules">
-                <p>פתרון חידה יזכה אותך ב-100 נקודות, פתרון חידה בזמן הקצוב יוסיף למאזנך עוד 50 נקודות. חשיפת אות אחת מהתשובה תפחית מהמאזן 50 נקודות. דילוג על תמונה יפחית מהמאזן 50 נקודות.</p>
-            </div>
+            <p class="rules">פתרון חידה יזכה אותך ב-100 נקודות, פתרון חידה בזמן הקצוב יוסיף למאזנך עוד 50 נקודות. חשיפת אות אחת מהתשובה תפחית מהמאזן 50 נקודות. דילוג על תמונה יפחית מהמאזן 50 נקודות.</p>
             <button id="start-game">התחל</button>
         </div>
-
         <div id="game-screen" style="display: none;">
             <div id="image-counter"></div>
             <div id="timer">60</div>
@@ -29,14 +25,13 @@
             <div id="game-controls">
                 <button id="reveal-letter">חשוף אות</button>
                 <button id="reset-game">אפס משחק</button>
-                <button id="skip-image">דלג על תמונה זו</button>
-                <button id="next-image">תמונה הבאה</button>
+                <button id="skip-image" style="display: none;">דלג על תמונה זו</button>
+                <button id="next-image" style="display: none;">תמונה הבאה</button>
             </div>
             <div id="score">ניקוד: <span id="score-value">0</span></div>
         </div>
-
         <div id="end-screen" style="display: none;">
-            <img id="end-image" src="theend.png" alt="תמונת סיום">
+            <img src="theend.png" alt="תמונת סיום" id="end-image">
             <h2>כל הכבוד, סיימת את המשחק!</h2>
             <div id="stats">
                 <h3>סיכום הישגים:</h3>
@@ -46,11 +41,9 @@
             </div>
             <button id="finish-game">התחל מחדש</button>
         </div>
-
         <button id="copyright-info">זכויות יוצרים</button>
     </div>
-
-    <div id="copyright-modal" class="modal">
+    <div id="copyright-modal" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>הצהרת זכויות יוצרים</h2>
@@ -60,12 +53,10 @@
             <p>לשאלות או בקשות הנוגעות לזכויות יוצרים, אנא צרו קשר עם הבעלים בכתובת: liranics@gmail.com</p>
         </div>
     </div>
-
     <audio id="background-music" loop>
         <source src="bgmusic.mp3" type="audio/mpeg">
         הדפדפן שלך לא תומך בתג האודיו.
     </audio>
-
     <script src="game.js"></script>
 </body>
 </html>
