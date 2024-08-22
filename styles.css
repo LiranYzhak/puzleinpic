@@ -226,8 +226,33 @@ button:hover {
     padding: 20px;
     border: 1px solid #888;
     width: 80%;
-    max-width: 500px;
+    max-width: 300px;
     border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#settings-modal .modal-content button {
+    width: 100%;
+    margin: 10px 0;
+    padding: 12px 20px;
+    font-size: 16px;
+    background-color: var(--button-bg);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#settings-modal .modal-content button:hover {
+    background-color: var(--button-hover);
+}
+
+#settings-modal .modal-content h2 {
+    margin-bottom: 20px;
+    color: var(--text-color);
 }
 
 .close {
@@ -265,21 +290,6 @@ h1 {
     margin-bottom: 20px;
 }
 
-#settings-modal .modal-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-}
-
-#settings-modal button {
-    width: 200px;
-}
-
-#close-settings {
-    margin-top: 20px;
-}
-
 .custom-alert {
     display: none;
     position: fixed;
@@ -292,7 +302,7 @@ h1 {
 }
 
 .custom-alert-content {
-    background-color: #ff0000;
+    background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
     color: white;
     margin: 15% auto;
     padding: 20px;
@@ -300,23 +310,31 @@ h1 {
     width: 80%;
     max-width: 400px;
     text-align: center;
-    font-size: 18px;
+    font-size: 24px;
     border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.custom-alert-content p {
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
 }
 
 .custom-alert-content button {
     background-color: white;
-    color: #ff0000;
+    color: #333;
     border: none;
     padding: 10px 20px;
     margin-top: 15px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 18px;
     border-radius: 5px;
+    transition: background-color 0.3s, transform 0.1s;
 }
 
 .custom-alert-content button:hover {
     background-color: #f0f0f0;
+    transform: scale(1.05);
 }
 
 @media (max-width: 600px) {

@@ -32,6 +32,7 @@ function initializeSettingsModal() {
     const modal = document.getElementById('settings-modal');
     const btn = document.getElementById('settings-button');
     const closeBtn = document.getElementById('close-settings');
+    const resetBtn = document.getElementById('reset-game');
 
     btn.onclick = function() {
         modal.style.display = "block";
@@ -41,22 +42,27 @@ function initializeSettingsModal() {
         modal.style.display = "none";
     }
 
+    resetBtn.onclick = function() {
+        confirmResetGame();
+        modal.style.display = "none"; // סגירת המודל לאחר לחיצה על אפס משחק
+    }
+
     window.onclick = function(event) {
         if (event.target == modal) {
             modal.style.display = "none";
         }
     }
+    // הוספת האזנה לכפתורים נוספים בתפריט ההגדרות
+    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+    document.getElementById('mute-toggle').addEventListener('click', toggleMute);
 }
 
 function initializeGame() {
     document.getElementById('start-game').addEventListener('click', startGame);
     document.getElementById('reveal-letter').addEventListener('click', revealLetter);
-    document.getElementById('next-image').addEventListener('click', nextImage);
     document.getElementById('skip-image').addEventListener('click', skipImage);
     document.getElementById('finish-game').addEventListener('click', resetGame);
-    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
-    document.getElementById('mute-toggle').addEventListener('click', toggleMute);
-    document.getElementById('reset-game').addEventListener('click', confirmResetGame);
+    // הסרנו את האזנה לכפתור 'reset-game' מכאן
     initializeSettingsModal();
     checkSavedTheme();
     initBackgroundMusic();
@@ -67,6 +73,7 @@ function initializeGame() {
 function initBackgroundMusic() {
     backgroundMusic = document.getElementById('background-music');
     backgroundMusic.volume = 0.5;
+    playBackgroundMusic(); // הפעלה אוטומטית בתחילת המשחק
 }
 
 function startGame() {
@@ -78,14 +85,20 @@ function startGame() {
         updateGuessContainer();
         generateLetters();
         updateImageCounter();
-        startTimer();
     }
-    playBackgroundMusic();
+    playBackgroundMusic(); // וודא שהמוזיקה מופעלת בתחילת המשחק
 }
 
 function playBackgroundMusic() {
     if (!isMuted) {
-        backgroundMusic.play().catch(e => console.error("Error playing audio:", e));
+        backgroundMusic.play().catch(e => {
+            console.error("Error playing audio:", e);
+            // במקרה של שגיאה, ננסה להפעיל את המוזיקה בלחיצת המשתמש הבאה
+            document.addEventListener('click', function playOnClick() {
+                backgroundMusic.play();
+                document.removeEventListener('click', playOnClick);
+            }, { once: true });
+        });
     }
 }
 
@@ -93,6 +106,9 @@ function toggleMute() {
     isMuted = !isMuted;
     backgroundMusic.muted = isMuted;
     document.getElementById('mute-toggle').textContent = isMuted ? 'הפעל מוזיקה' : 'השתק מוזיקה';
+    if (!isMuted) {
+        playBackgroundMusic(); // הפעלת המוזיקה אם מבטלים השתקה
+    }
     saveGameState();
 }
 
@@ -116,7 +132,6 @@ function loadRandomImage() {
     guessedPhrase = Array(currentPhrase.length).fill(null);
     updateGuessContainer();
     generateLetters();
-    document.getElementById('next-image').style.display = 'none';
     updateSkipButtonVisibility();
     updateImageCounter();
     startTimer();
@@ -127,14 +142,20 @@ function startTimer() {
     clearInterval(timer);
     timeLeft = 60;
     updateTimerDisplay();
+    updateSkipButtonVisibility(); // מסתיר את כפתור הדילוג בתחילת הטיימר
     timer = setInterval(() => {
         timeLeft--;
         updateTimerDisplay();
         if (timeLeft <= 0) {
             clearInterval(timer);
+            updateSkipButtonVisibility(); // מציג את כפתור הדילוג כשהטיימר מסתיים
         }
         saveGameState();
     }, 1000);
+}
+
+function stopTimer() {
+    clearInterval(timer);
 }
 
 function updateTimerDisplay() {
@@ -219,7 +240,7 @@ function checkAnswer() {
     const letterBoxes = document.querySelectorAll('#guess-container .letter-box');
     
     if (guessedWord === currentPhrase) {
-        clearInterval(timer);
+        stopTimer();
         letterBoxes.forEach(box => box.classList.add('correct-answer'));
         score += 100;
         if (timeLeft > 0) {
@@ -227,9 +248,10 @@ function checkAnswer() {
         }
         totalTime += (60 - timeLeft);
         document.getElementById('score-value').textContent = score;
-        document.getElementById('next-image').style.display = 'inline-block';
         updateSkipButtonVisibility();
         saveGameState();
+        
+        setTimeout(loadRandomImage, 3000); // מעבר אוטומטי לתמונה הבאה לאחר 3 שניות
     } else if (guessedWord.length === currentPhrase.length) {
         letterBoxes.forEach(box => box.classList.add('incorrect-answer'));
     } else {
@@ -260,25 +282,21 @@ function revealLetter() {
     }
 }
 
-function nextImage() {
-    loadRandomImage();
-}
-
 function skipImage() {
-    if (score >= 50) {
+    if (timeLeft <= 0 && score >= 50) {
         score -= 50;
         document.getElementById('score-value').textContent = score;
         loadRandomImage();
         updateSkipButtonVisibility();
         saveGameState();
     } else {
-        showCustomAlert('אין מספיק נקודות לדילוג על תמונה');
+        showCustomAlert('אין אפשרות לדלג על תמונה זו כעת');
     }
 }
 
 function updateSkipButtonVisibility() {
     const skipButton = document.getElementById('skip-image');
-    if (score >= 50) {
+    if (timeLeft <= 0 && score >= 50) {
         skipButton.style.display = 'inline-block';
     } else {
         skipButton.style.display = 'none';
@@ -364,7 +382,6 @@ function loadGameState() {
         guessedPhrase = gameState.guessedPhrase;
         score = gameState.score;
         usedImages = new Set(gameState.usedImages);
-        timeLeft = gameState.timeLeft;
         hintsUsed = gameState.hintsUsed;
         totalTime = gameState.totalTime;
         isDarkMode = gameState.isDarkMode;
@@ -372,6 +389,10 @@ function loadGameState() {
         copyrightClickCount = gameState.copyrightClickCount || 0;
         bonusAwarded = gameState.bonusAwarded || false;
 
+        timeLeft = 0;
+        updateTimerDisplay();
+        updateSkipButtonVisibility();
+        
         document.getElementById('score-value').textContent = score;
         if (usedImages.size > 0) {
             document.getElementById('welcome-screen').style.display = 'none';
@@ -381,15 +402,15 @@ function loadGameState() {
             updateGuessContainer();
             generateLetters();
             updateImageCounter();
-            startTimer();
-            updateSkipButtonVisibility();
         }
+        
         backgroundMusic.muted = isMuted;
-        document.getElementById('theme-toggle').textContent = isDarkMode ? 'מצב בהיר' : 'מצב כהה';
         document.getElementById('mute-toggle').textContent = isMuted ? 'הפעל מוזיקה' : 'השתק מוזיקה';
-        if (!isMuted) {
-            playBackgroundMusic();
-        }
+        document.getElementById('theme-toggle').textContent = isDarkMode ? 'מצב בהיר' : 'מצב כהה';
+        
+        playBackgroundMusic(); // הפעלה אוטומטית של המוזיקה
+    } else {
+        playBackgroundMusic(); // הפעלה אוטומטית גם אם אין מצב שמור
     }
 }
 
@@ -423,7 +444,7 @@ function checkSecretBonus() {
     if (copyrightClickCount === 10 && !bonusAwarded) {
         score += 1000;
         document.getElementById('score-value').textContent = score;
-        showCustomAlert('גילית את הבונוס הנסתר! קיבלת 1000 נקודות בונוס!');
+        showCustomAlert('<strong style="font-size: 28px;">בונוס סודי!</strong><br>גילית את הבונוס הנסתר!<br>קיבלת 1000 נקודות בונוס!');
         bonusAwarded = true;
         updateSkipButtonVisibility();
         saveGameState();
@@ -431,7 +452,7 @@ function checkSecretBonus() {
 }
 
 function showCustomAlert(message) {
-    document.getElementById('custom-alert-message').textContent = message;
+    document.getElementById('custom-alert-message').innerHTML = message;
     document.getElementById('custom-alert').style.display = 'block';
 }
 
