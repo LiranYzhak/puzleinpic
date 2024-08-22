@@ -28,6 +28,26 @@ function loadGameData() {
         .catch(error => console.error('Error loading game data:', error));
 }
 
+function initializeSettingsModal() {
+    const modal = document.getElementById('settings-modal');
+    const btn = document.getElementById('settings-button');
+    const closeBtn = document.getElementById('close-settings');
+
+    btn.onclick = function() {
+        modal.style.display = "block";
+    }
+
+    closeBtn.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+}
+
 function initializeGame() {
     document.getElementById('start-game').addEventListener('click', startGame);
     document.getElementById('reveal-letter').addEventListener('click', revealLetter);
@@ -37,6 +57,7 @@ function initializeGame() {
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     document.getElementById('mute-toggle').addEventListener('click', toggleMute);
     document.getElementById('reset-game').addEventListener('click', confirmResetGame);
+    initializeSettingsModal();
     checkSavedTheme();
     initBackgroundMusic();
     loadGameState();
@@ -305,6 +326,7 @@ function toggleTheme() {
     isDarkMode = !isDarkMode;
     document.body.classList.toggle('dark-mode', isDarkMode);
     localStorage.setItem('darkMode', isDarkMode);
+    document.getElementById('theme-toggle').textContent = isDarkMode ? 'מצב בהיר' : 'מצב כהה';
 }
 
 function checkSavedTheme() {
@@ -363,6 +385,7 @@ function loadGameState() {
             updateSkipButtonVisibility();
         }
         backgroundMusic.muted = isMuted;
+        document.getElementById('theme-toggle').textContent = isDarkMode ? 'מצב בהיר' : 'מצב כהה';
         document.getElementById('mute-toggle').textContent = isMuted ? 'הפעל מוזיקה' : 'השתק מוזיקה';
         if (!isMuted) {
             playBackgroundMusic();

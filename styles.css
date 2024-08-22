@@ -46,25 +46,11 @@ body {
     margin: 20px auto;
 }
 
-#theme-toggle, #mute-toggle {
+#settings-button {
     position: absolute;
     top: 10px;
-    background-color: var(--button-bg);
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    font-size: 12px;
-    cursor: pointer;
-    border-radius: 5px;
-    z-index: 10;
-}
-
-#theme-toggle {
-    right: 10px;
-}
-
-#mute-toggle {
     left: 10px;
+    z-index: 1000;
 }
 
 #image-counter {
@@ -279,7 +265,21 @@ h1 {
     margin-bottom: 20px;
 }
 
-/* Custom Alert Styles */
+#settings-modal .modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+#settings-modal button {
+    width: 200px;
+}
+
+#close-settings {
+    margin-top: 20px;
+}
+
 .custom-alert {
     display: none;
     position: fixed;
