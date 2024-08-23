@@ -251,7 +251,9 @@ function checkAnswer() {
         updateSkipButtonVisibility();
         saveGameState();
         
-        setTimeout(loadRandomImage, 3000); // מעבר אוטומטי לתמונה הבאה לאחר 3 שניות
+        setTimeout(() => {
+            loadRandomImage();
+        }, 3000); // מעבר אוטומטי לתמונה הבאה לאחר 3 שניות
     } else if (guessedWord.length === currentPhrase.length) {
         letterBoxes.forEach(box => box.classList.add('incorrect-answer'));
     } else {
