@@ -319,34 +319,36 @@ h1 {
     width: 100%;
     height: 100%;
     background-color: rgba(0,0,0,0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .custom-alert-content {
     background-color: var(--container-bg);
     color: var(--text-color);
-    margin: 15% auto;
     padding: 20px;
     border: 1px solid var(--button-bg);
     width: 80%;
-    max-width: 400px;
+    max-width: 300px;
     text-align: center;
-    font-size: 24px;
+    font-size: 18px;
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
 .custom-alert-content p {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .custom-alert-content button {
     background-color: var(--button-bg);
     color: white;
     border: none;
-    padding: 10px 20px;
-    margin-top: 15px;
+    padding: 8px 16px;
+    margin-top: 10px;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 16px;
     border-radius: 5px;
     transition: background-color 0.3s, transform 0.1s;
 }
