@@ -179,7 +179,11 @@ function updateGuessContainer() {
         }
         const box = document.createElement('div');
         box.className = 'letter-box';
-        box.textContent = guessedPhrase[index] || '';
+        if (guessedPhrase[index]) {
+            box.textContent = guessedPhrase[index];
+            box.classList.add('adding');
+            setTimeout(() => box.classList.remove('adding'), 10);
+        }
         box.addEventListener('click', () => removeLetter(index));
         container.appendChild(box);
         wordIndex++;
@@ -221,17 +225,27 @@ function generateLetters() {
 function handleLetterClick(letter) {
     const emptyIndex = guessedPhrase.indexOf(null);
     if (emptyIndex !== -1) {
-        guessedPhrase[emptyIndex] = letter;
-        updateGuessContainer();
-        saveGameState();
+        const letterBoxes = document.querySelectorAll('#guess-container .letter-box');
+        letterBoxes[emptyIndex].classList.add('adding');
+        
+        setTimeout(() => {
+            guessedPhrase[emptyIndex] = letter;
+            updateGuessContainer();
+            saveGameState();
+        }, 300); // זמן התואם את משך האנימציה ב-CSS
     }
 }
 
 function removeLetter(index) {
     if (guessedPhrase[index] !== null) {
-        guessedPhrase[index] = null;
-        updateGuessContainer();
-        saveGameState();
+        const letterBoxes = document.querySelectorAll('#guess-container .letter-box');
+        letterBoxes[index].classList.add('removing');
+        
+        setTimeout(() => {
+            guessedPhrase[index] = null;
+            updateGuessContainer();
+            saveGameState();
+        }, 300); // זמן התואם את משך האנימציה ב-CSS
     }
 }
 
