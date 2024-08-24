@@ -360,7 +360,7 @@ h1 {
 @media (max-width: 540px) {
     #banner-container,
     #game-container {
-        width: 100%;
+        width: 90%;
     }
 }
 
