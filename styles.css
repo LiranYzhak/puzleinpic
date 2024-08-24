@@ -61,6 +61,7 @@ body {
     max-width: 500px;
     position: relative;
     margin: 0 auto;
+    overflow: hidden;
 }
 
 #image-counter {
@@ -312,7 +313,7 @@ h1 {
 
 .custom-alert {
     display: none;
-    position: fixed;
+    position: absolute;
     z-index: 1000;
     left: 0;
     top: 0;
