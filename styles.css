@@ -322,11 +322,11 @@ h1 {
 }
 
 .custom-alert-content {
-    background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
-    color: white;
+    background-color: var(--container-bg);
+    color: var(--text-color);
     margin: 15% auto;
     padding: 20px;
-    border: 1px solid #888;
+    border: 1px solid var(--button-bg);
     width: 80%;
     max-width: 400px;
     text-align: center;
@@ -337,12 +337,11 @@ h1 {
 
 .custom-alert-content p {
     margin-bottom: 20px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
 }
 
 .custom-alert-content button {
-    background-color: white;
-    color: #333;
+    background-color: var(--button-bg);
+    color: white;
     border: none;
     padding: 10px 20px;
     margin-top: 15px;
@@ -353,7 +352,7 @@ h1 {
 }
 
 .custom-alert-content button:hover {
-    background-color: #f0f0f0;
+    background-color: var(--button-hover);
     transform: scale(1.05);
 }
 
