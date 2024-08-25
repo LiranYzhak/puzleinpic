@@ -240,6 +240,15 @@ button:hover {
     margin-top: 0;
 }
 
+#welcome-screen {
+    text-align: right;
+}
+
+#welcome-screen h1, 
+#welcome-screen > p {
+    text-align: center;
+}
+
 .sub-title {
     font-size: 1.2em;
 }
@@ -249,6 +258,39 @@ button:hover {
     padding: 10px;
     border-radius: 5px;
     margin-top: 20px;
+    margin-bottom: 20px; /* מרווח בין החוקים לכפתור */
+    text-align: right;
+}
+
+.rules ul {
+    padding-right: 20px;
+    padding-left: 0;
+    list-style-position: inside;
+}
+
+.rules li {
+    margin-bottom: 5px;
+}
+
+.start-button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+#start-game {
+    font-size: 1.2em;
+    padding: 10px 30px;
+    background-color: #4CAF50; /* צבע ירוק */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#start-game:hover {
+    background-color: #45a049; /* צבע ירוק כהה יותר להובר */
 }
 
 .bottom-corner-button {

@@ -2,7 +2,7 @@
 let currentImageIndex = 0;
 let currentPhrase = '';
 let guessedPhrase = [];
-let score = 0;
+let score = 100;
 let gameData = [];
 let availableLetters = [];
 let usedImages = new Set();
@@ -15,7 +15,6 @@ let isMuted = false;
 let backgroundMusic;
 let copyrightClickCount = 0;
 let bonusAwarded = false;
-let currentStreak = 0;
 
 // אתחול המשחק
 function loadGameData() {
@@ -23,7 +22,6 @@ function loadGameData() {
         .then(response => response.text())
         .then(data => {
             const rows = data.split('\n');
-            // דילוג על השורה הראשונה (כותרות) ועיבוד שאר השורות
             gameData = rows.slice(1).map(row => {
                 const [image, phrase, easyHint, hardHint] = row.split(',');
                 return { image, phrase: phrase.trim(), easyHint, hardHint };
@@ -78,13 +76,15 @@ function startGame() {
     document.getElementById('welcome-screen').style.display = 'none';
     document.getElementById('game-screen').style.display = 'block';
     if (usedImages.size === 0) {
+        score = 100;
+        updateScore();
         loadRandomImage();
     } else {
         updateGuessContainer();
         generateLetters();
         updateImageCounter();
     }
-    clearHintDisplay(); // ניקוי תצוגת הרמז
+    clearHintDisplay();
     playBackgroundMusic();
 }
 
@@ -111,7 +111,7 @@ function loadRandomImage() {
     generateLetters();
     updateImageCounter();
     startTimer();
-    clearHintDisplay(); // ניקוי תצוגת הרמז
+    clearHintDisplay();
     saveGameState();
 }
 
@@ -193,9 +193,8 @@ function checkAnswer() {
         letterBoxes.forEach(box => box.classList.add('correct-answer'));
         const finalScore = calculateScore(timeLeft);
         score += finalScore;
-        currentStreak++;
         totalTime += (60 - timeLeft);
-        document.getElementById('score-value').textContent = score;
+        updateScore();
         saveGameState();
         
         setTimeout(() => {
@@ -203,7 +202,6 @@ function checkAnswer() {
         }, 3000);
     } else if (guessedWord.length === currentPhrase.length) {
         letterBoxes.forEach(box => box.classList.add('incorrect-answer'));
-        currentStreak = 0;
     } else {
         letterBoxes.forEach(box => {
             box.classList.remove('correct-answer', 'incorrect-answer');
@@ -223,16 +221,13 @@ function toggleHintMenu(event) {
         const gameRect = gameContainer.getBoundingClientRect();
         const imageRect = imageElement.getBoundingClientRect();
         
-        // חישוב המיקום במרכז מעל התמונה
-        const topPosition = imageRect.top - gameRect.top + 10; // 10 פיקסלים מתחת לקצה העליון של התמונה
+        const topPosition = imageRect.top - gameRect.top + 10;
         const leftPosition = (imageRect.left + imageRect.right) / 2 - gameRect.left;
         
-        // מיקום התפריט
         hintMenu.style.top = `${topPosition}px`;
         hintMenu.style.left = `${leftPosition}px`;
-        hintMenu.style.transform = 'translateX(-50%)'; // מרכוז אופקי
+        hintMenu.style.transform = 'translateX(-50%)';
 
-        // וידוא שהתפריט לא חורג מגבולות חלון המשחק
         const menuRect = hintMenu.getBoundingClientRect();
         if (menuRect.left < gameRect.left) {
             hintMenu.style.left = '0px';
@@ -292,7 +287,7 @@ function getHint(hintType) {
             return;
     }
     
-    score -= cost;
+    score = Math.round(score - cost);
     updateScore();
     showHint(hint);
     updateHintButtons();
@@ -318,6 +313,10 @@ function showHint(hint) {
     document.getElementById('hint-display').textContent = hint;
 }
 
+function clearHintDisplay() {
+    document.getElementById('hint-display').textContent = '';
+}
+
 function updateHintButtons() {
     const easyHintBtn = document.getElementById('easy-hint');
     const hardHintBtn = document.getElementById('hard-hint');
@@ -329,7 +328,6 @@ function updateHintButtons() {
     letterHintBtn.disabled = score < 15;
     skipImageBtn.disabled = score < 50;
 
-    // עדכון הטקסט של הכפתורים לכלול את עלות הרמז
     easyHintBtn.textContent = `רמז קל (${hintsUsed.easy ? 'נוצל' : '20-'})`;
     hardHintBtn.textContent = `רמז קשה (${hintsUsed.hard ? 'נוצל' : '10-'})`;
     letterHintBtn.textContent = `חשוף אות (15-)`;
@@ -343,14 +341,9 @@ function resetHints() {
     updateHintButtons();
 }
 
-// פונקציה חדשה לניקוי תצוגת הרמז
-function clearHintDisplay() {
-    document.getElementById('hint-display').textContent = '';
-}
-
 function skipImage() {
     if (score >= 50) {
-        score -= 50;
+        score = Math.round(score - 50);
         updateScore();
         loadRandomImage();
         clearHintDisplay();
@@ -360,17 +353,12 @@ function skipImage() {
 
 // ניהול ניקוד וזמן
 function calculateScore(timeLeft) {
-    let finalScore = 100; // ניקוד בסיסי
-    
-    finalScore += timeLeft; // בונוס זמן
-    
+    let finalScore = 100;
+    finalScore += timeLeft;
     if (hintsUsed.easy) finalScore -= 20;
     if (hintsUsed.hard) finalScore -= 10;
     finalScore -= hintsUsed.letter * 15;
-    
-    if (currentStreak % 5 === 0 && currentStreak > 0) finalScore += 10; // בונוס רצף
-    
-    return Math.max(finalScore, 0);
+    return Math.round(Math.max(finalScore, 0));
 }
 
 function startTimer() {
@@ -396,12 +384,12 @@ function updateTimerDisplay() {
 }
 
 function updateScore() {
+    score = Math.round(score);
     document.getElementById('score-value').textContent = score;
-    updateHintButtons(); // עדכון מצב הכפתורים בכל שינוי בניקוד
+    updateHintButtons();
 }
 
 function updateImageCounter() {
-    // התאמת המונה כך שיתחיל מ-1 ויסתיים במספר האמיתי של התמונות
     document.getElementById('image-counter').textContent = `תמונה ${usedImages.size} מתוך ${gameData.length}`;
 }
 
@@ -413,7 +401,6 @@ function endGame() {
     
     document.getElementById('final-score').textContent = score;
     document.getElementById('hints-used').textContent = hintsUsed.easy + hintsUsed.hard + hintsUsed.letter;
-    // שימוש ב-gameData.length במקום usedImages.size לחישוב הזמן הממוצע
     const averageTime = (totalTime / gameData.length).toFixed(2);
     document.getElementById('average-time').textContent = averageTime;
     
@@ -424,17 +411,16 @@ function endGame() {
 
 function resetGame() {
     currentImageIndex = 0;
-    score = 0;
+    score = 100;
     hintsUsed = { easy: false, hard: false, letter: 0 };
     totalTime = 0;
     usedImages.clear();
     copyrightClickCount = 0;
     bonusAwarded = false;
-    currentStreak = 0;
-    document.getElementById('score-value').textContent = score;
+    updateScore();
     document.getElementById('end-screen').style.display = 'none';
     document.getElementById('welcome-screen').style.display = 'block';
-    clearHintDisplay(); // ניקוי תצוגת הרמז
+    clearHintDisplay();
     clearGameState();
     playBackgroundMusic();
 }
@@ -460,8 +446,7 @@ function saveGameState() {
         isDarkMode,
         isMuted,
         copyrightClickCount,
-        bonusAwarded,
-        currentStreak
+        bonusAwarded
     };
     localStorage.setItem('gameState', JSON.stringify(gameState));
 }
@@ -481,12 +466,11 @@ function loadGameState() {
         isMuted = gameState.isMuted;
         copyrightClickCount = gameState.copyrightClickCount || 0;
         bonusAwarded = gameState.bonusAwarded || false;
-        currentStreak = gameState.currentStreak || 0;
 
         timeLeft = 0;
         updateTimerDisplay();
         
-        document.getElementById('score-value').textContent = score;
+        updateScore();
         if (usedImages.size > 0) {
             document.getElementById('welcome-screen').style.display = 'none';
             document.getElementById('game-screen').style.display = 'block';
@@ -495,6 +479,9 @@ function loadGameState() {
             updateGuessContainer();
             generateLetters();
             updateImageCounter();
+        } else {
+            score = 100;
+            updateScore();
         }
         
         backgroundMusic.muted = isMuted;
@@ -503,8 +490,9 @@ function loadGameState() {
         
         playBackgroundMusic();
     } else {
+        score = 100;
+        updateScore();
         playBackgroundMusic();
-        updateHintButtons();
     }
 }
 
@@ -582,8 +570,8 @@ function initializeCopyrightModal() {
 
 function checkSecretBonus() {
     if (copyrightClickCount === 10 && !bonusAwarded) {
-        score += 500;
-        document.getElementById('score-value').textContent = score;
+        score = Math.round(score + 500);
+        updateScore();
         showCustomAlert(`
             <strong style="font-size: 24px;">🎉 בונוס מסתורי נחשף! 🎉</strong><br><br>
             גילית סוד נסתר במשחק!<br>
