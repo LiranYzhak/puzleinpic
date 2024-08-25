@@ -1,3 +1,4 @@
+// משתנים גלובליים
 let currentImageIndex = 0;
 let currentPhrase = '';
 let guessedPhrase = [];
@@ -7,25 +8,42 @@ let availableLetters = [];
 let usedImages = new Set();
 let timer;
 let timeLeft;
-let hintsUsed = 0;
+let hintsUsed = { easy: false, hard: false, letter: 0 };
 let totalTime = 0;
 let isDarkMode = false;
 let isMuted = false;
 let backgroundMusic;
 let copyrightClickCount = 0;
 let bonusAwarded = false;
+let currentStreak = 0;
 
+// אתחול המשחק
 function loadGameData() {
     fetch('game_data.csv')
         .then(response => response.text())
         .then(data => {
-            gameData = data.split('\n').map(row => {
-                const [image, phrase] = row.split(',');
-                return { image, phrase: phrase.trim() };
+            const rows = data.split('\n');
+            // דילוג על השורה הראשונה (כותרות) ועיבוד שאר השורות
+            gameData = rows.slice(1).map(row => {
+                const [image, phrase, easyHint, hardHint] = row.split(',');
+                return { image, phrase: phrase.trim(), easyHint, hardHint };
             });
             initializeGame();
         })
         .catch(error => console.error('Error loading game data:', error));
+}
+
+function initializeGame() {
+    document.getElementById('start-game').addEventListener('click', startGame);
+    document.getElementById('finish-game').addEventListener('click', resetGame);
+    document.getElementById('hint-button').addEventListener('click', toggleHintMenu);
+    initializeSettingsModal();
+    initializeHintButtons();
+    checkSavedTheme();
+    initBackgroundMusic();
+    loadGameState();
+    initializeCopyrightModal();
+    updateHintButtons();
 }
 
 function initializeSettingsModal() {
@@ -34,48 +52,28 @@ function initializeSettingsModal() {
     const closeBtn = document.getElementById('close-settings');
     const resetBtn = document.getElementById('reset-game');
 
-    btn.onclick = function() {
-        modal.style.display = "block";
-    }
-
-    closeBtn.onclick = function() {
-        modal.style.display = "none";
-    }
-
-    resetBtn.onclick = function() {
+    btn.onclick = () => modal.style.display = "block";
+    closeBtn.onclick = () => modal.style.display = "none";
+    resetBtn.onclick = () => {
         confirmResetGame();
-        modal.style.display = "none"; // סגירת המודל לאחר לחיצה על אפס משחק
-    }
+        modal.style.display = "none";
+    };
+    window.onclick = (event) => {
+        if (event.target == modal) modal.style.display = "none";
+    };
 
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-    // הוספת האזנה לכפתורים נוספים בתפריט ההגדרות
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     document.getElementById('mute-toggle').addEventListener('click', toggleMute);
 }
 
-function initializeGame() {
-    document.getElementById('start-game').addEventListener('click', startGame);
-    document.getElementById('reveal-letter').addEventListener('click', revealLetter);
-    document.getElementById('skip-image').addEventListener('click', skipImage);
-    document.getElementById('finish-game').addEventListener('click', resetGame);
-    // הסרנו את האזנה לכפתור 'reset-game' מכאן
-    initializeSettingsModal();
-    checkSavedTheme();
-    initBackgroundMusic();
-    loadGameState();
-    initializeCopyrightModal();
+function initializeHintButtons() {
+    document.getElementById('easy-hint').addEventListener('click', () => getHint('easy'));
+    document.getElementById('hard-hint').addEventListener('click', () => getHint('hard'));
+    document.getElementById('letter-hint').addEventListener('click', () => getHint('letter'));
+    document.getElementById('skip-image').addEventListener('click', () => getHint('skip'));
 }
 
-function initBackgroundMusic() {
-    backgroundMusic = document.getElementById('background-music');
-    backgroundMusic.volume = 0.5;
-    playBackgroundMusic(); // הפעלה אוטומטית בתחילת המשחק
-}
-
+// ניהול מצב המשחק
 function startGame() {
     document.getElementById('welcome-screen').style.display = 'none';
     document.getElementById('game-screen').style.display = 'block';
@@ -86,30 +84,8 @@ function startGame() {
         generateLetters();
         updateImageCounter();
     }
-    playBackgroundMusic(); // וודא שהמוזיקה מופעלת בתחילת המשחק
-}
-
-function playBackgroundMusic() {
-    if (!isMuted) {
-        backgroundMusic.play().catch(e => {
-            console.error("Error playing audio:", e);
-            // במקרה של שגיאה, ננסה להפעיל את המוזיקה בלחיצת המשתמש הבאה
-            document.addEventListener('click', function playOnClick() {
-                backgroundMusic.play();
-                document.removeEventListener('click', playOnClick);
-            }, { once: true });
-        });
-    }
-}
-
-function toggleMute() {
-    isMuted = !isMuted;
-    backgroundMusic.muted = isMuted;
-    document.getElementById('mute-toggle').textContent = isMuted ? 'הפעל מוזיקה' : 'השתק מוזיקה';
-    if (!isMuted) {
-        playBackgroundMusic(); // הפעלת המוזיקה אם מבטלים השתקה
-    }
-    saveGameState();
+    clearHintDisplay(); // ניקוי תצוגת הרמז
+    playBackgroundMusic();
 }
 
 function loadRandomImage() {
@@ -130,40 +106,13 @@ function loadRandomImage() {
     document.getElementById('current-image').src = imageData.image;
     currentPhrase = imageData.phrase.replace(/\s+/g, '');
     guessedPhrase = Array(currentPhrase.length).fill(null);
+    resetHints();
     updateGuessContainer();
     generateLetters();
-    updateSkipButtonVisibility();
     updateImageCounter();
     startTimer();
+    clearHintDisplay(); // ניקוי תצוגת הרמז
     saveGameState();
-}
-
-function startTimer() {
-    clearInterval(timer);
-    timeLeft = 60;
-    updateTimerDisplay();
-    updateSkipButtonVisibility(); // מסתיר את כפתור הדילוג בתחילת הטיימר
-    timer = setInterval(() => {
-        timeLeft--;
-        updateTimerDisplay();
-        if (timeLeft <= 0) {
-            clearInterval(timer);
-            updateSkipButtonVisibility(); // מציג את כפתור הדילוג כשהטיימר מסתיים
-        }
-        saveGameState();
-    }, 1000);
-}
-
-function stopTimer() {
-    clearInterval(timer);
-}
-
-function updateTimerDisplay() {
-    document.getElementById('timer').textContent = timeLeft;
-}
-
-function updateImageCounter() {
-    document.getElementById('image-counter').textContent = `תמונה ${usedImages.size} מתוך ${gameData.length}`;
 }
 
 function updateGuessContainer() {
@@ -179,11 +128,7 @@ function updateGuessContainer() {
         }
         const box = document.createElement('div');
         box.className = 'letter-box';
-        if (guessedPhrase[index]) {
-            box.textContent = guessedPhrase[index];
-            box.classList.add('adding');
-            setTimeout(() => box.classList.remove('adding'), 10);
-        }
+        box.textContent = guessedPhrase[index] || '';
         box.addEventListener('click', () => removeLetter(index));
         container.appendChild(box);
         wordIndex++;
@@ -225,27 +170,17 @@ function generateLetters() {
 function handleLetterClick(letter) {
     const emptyIndex = guessedPhrase.indexOf(null);
     if (emptyIndex !== -1) {
-        const letterBoxes = document.querySelectorAll('#guess-container .letter-box');
-        letterBoxes[emptyIndex].classList.add('adding');
-        
-        setTimeout(() => {
-            guessedPhrase[emptyIndex] = letter;
-            updateGuessContainer();
-            saveGameState();
-        }, 300); // זמן התואם את משך האנימציה ב-CSS
+        guessedPhrase[emptyIndex] = letter;
+        updateGuessContainer();
+        saveGameState();
     }
 }
 
 function removeLetter(index) {
     if (guessedPhrase[index] !== null) {
-        const letterBoxes = document.querySelectorAll('#guess-container .letter-box');
-        letterBoxes[index].classList.add('removing');
-        
-        setTimeout(() => {
-            guessedPhrase[index] = null;
-            updateGuessContainer();
-            saveGameState();
-        }, 300); // זמן התואם את משך האנימציה ב-CSS
+        guessedPhrase[index] = null;
+        updateGuessContainer();
+        saveGameState();
     }
 }
 
@@ -256,20 +191,19 @@ function checkAnswer() {
     if (guessedWord === currentPhrase) {
         stopTimer();
         letterBoxes.forEach(box => box.classList.add('correct-answer'));
-        score += 100;
-        if (timeLeft > 0) {
-            score += 50;
-        }
+        const finalScore = calculateScore(timeLeft);
+        score += finalScore;
+        currentStreak++;
         totalTime += (60 - timeLeft);
         document.getElementById('score-value').textContent = score;
-        updateSkipButtonVisibility();
         saveGameState();
         
         setTimeout(() => {
             loadRandomImage();
-        }, 3000); // מעבר אוטומטי לתמונה הבאה לאחר 3 שניות
+        }, 3000);
     } else if (guessedWord.length === currentPhrase.length) {
         letterBoxes.forEach(box => box.classList.add('incorrect-answer'));
+        currentStreak = 0;
     } else {
         letterBoxes.forEach(box => {
             box.classList.remove('correct-answer', 'incorrect-answer');
@@ -277,56 +211,210 @@ function checkAnswer() {
     }
 }
 
-function revealLetter() {
-    if (score >= 50) {
-        const emptyIndices = guessedPhrase.reduce((acc, letter, index) => {
-            if (letter === null) acc.push(index);
-            return acc;
-        }, []);
-        if (emptyIndices.length > 0) {
-            const hintIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
-            guessedPhrase[hintIndex] = currentPhrase[hintIndex];
-            updateGuessContainer();
-            score -= 50;
-            hintsUsed++;
-            document.getElementById('score-value').textContent = score;
-            updateSkipButtonVisibility();
-            saveGameState();
+// ניהול רמזים
+function toggleHintMenu(event) {
+    const hintMenu = document.getElementById('hint-menu');
+    const gameContainer = document.getElementById('game-container');
+    const imageElement = document.getElementById('current-image');
+
+    if (hintMenu.style.display === 'none' || hintMenu.style.display === '') {
+        hintMenu.style.display = 'block';
+        
+        const gameRect = gameContainer.getBoundingClientRect();
+        const imageRect = imageElement.getBoundingClientRect();
+        
+        // חישוב המיקום במרכז מעל התמונה
+        const topPosition = imageRect.top - gameRect.top + 10; // 10 פיקסלים מתחת לקצה העליון של התמונה
+        const leftPosition = (imageRect.left + imageRect.right) / 2 - gameRect.left;
+        
+        // מיקום התפריט
+        hintMenu.style.top = `${topPosition}px`;
+        hintMenu.style.left = `${leftPosition}px`;
+        hintMenu.style.transform = 'translateX(-50%)'; // מרכוז אופקי
+
+        // וידוא שהתפריט לא חורג מגבולות חלון המשחק
+        const menuRect = hintMenu.getBoundingClientRect();
+        if (menuRect.left < gameRect.left) {
+            hintMenu.style.left = '0px';
+            hintMenu.style.transform = 'none';
+        } else if (menuRect.right > gameRect.right) {
+            hintMenu.style.left = 'auto';
+            hintMenu.style.right = '0px';
+            hintMenu.style.transform = 'none';
+        }
+        if (menuRect.top < gameRect.top) {
+            hintMenu.style.top = '0px';
         }
     } else {
-        showCustomAlert('אין מספיק נקודות לחשיפת אות');
+        hintMenu.style.display = 'none';
     }
+    
+    event.stopPropagation();
+    document.addEventListener('click', closeHintMenu);
+}
+
+function closeHintMenu(event) {
+    const hintMenu = document.getElementById('hint-menu');
+    const hintButton = document.getElementById('hint-button');
+    if (!hintMenu.contains(event.target) && event.target !== hintButton) {
+        hintMenu.style.display = 'none';
+        document.removeEventListener('click', closeHintMenu);
+    }
+}
+
+function getHint(hintType) {
+    let cost = 0;
+    let hint = '';
+    
+    switch(hintType) {
+        case 'easy':
+            if (hintsUsed.easy || score < 20) return;
+            cost = 20;
+            hint = gameData[currentImageIndex].easyHint;
+            hintsUsed.easy = true;
+            break;
+        case 'hard':
+            if (hintsUsed.hard || score < 10) return;
+            cost = 10;
+            hint = gameData[currentImageIndex].hardHint;
+            hintsUsed.hard = true;
+            break;
+        case 'letter':
+            if (score < 15) return;
+            cost = 15;
+            hint = revealRandomLetter();
+            hintsUsed.letter++;
+            break;
+        case 'skip':
+            if (score < 50) return;
+            skipImage();
+            closeHintMenu();
+            return;
+    }
+    
+    score -= cost;
+    updateScore();
+    showHint(hint);
+    updateHintButtons();
+    closeHintMenu();
+}
+
+function revealRandomLetter() {
+    const unrevealedIndices = guessedPhrase.reduce((acc, letter, index) => {
+        if (letter === null) acc.push(index);
+        return acc;
+    }, []);
+    
+    if (unrevealedIndices.length > 0) {
+        const randomIndex = unrevealedIndices[Math.floor(Math.random() * unrevealedIndices.length)];
+        guessedPhrase[randomIndex] = currentPhrase[randomIndex];
+        updateGuessContainer();
+        return `האות שנחשפה היא: ${currentPhrase[randomIndex]}`;
+    }
+    return 'כל האותיות כבר נחשפו';
+}
+
+function showHint(hint) {
+    document.getElementById('hint-display').textContent = hint;
+}
+
+function updateHintButtons() {
+    const easyHintBtn = document.getElementById('easy-hint');
+    const hardHintBtn = document.getElementById('hard-hint');
+    const letterHintBtn = document.getElementById('letter-hint');
+    const skipImageBtn = document.getElementById('skip-image');
+
+    easyHintBtn.disabled = hintsUsed.easy || score < 20;
+    hardHintBtn.disabled = hintsUsed.hard || score < 10;
+    letterHintBtn.disabled = score < 15;
+    skipImageBtn.disabled = score < 50;
+
+    // עדכון הטקסט של הכפתורים לכלול את עלות הרמז
+    easyHintBtn.textContent = `רמז קל (${hintsUsed.easy ? 'נוצל' : '20-'})`;
+    hardHintBtn.textContent = `רמז קשה (${hintsUsed.hard ? 'נוצל' : '10-'})`;
+    letterHintBtn.textContent = `חשוף אות (15-)`;
+    skipImageBtn.textContent = `דלג על תמונה (50-)`;
+}
+
+function resetHints() {
+    hintsUsed.easy = false;
+    hintsUsed.hard = false;
+    hintsUsed.letter = 0;
+    updateHintButtons();
+}
+
+// פונקציה חדשה לניקוי תצוגת הרמז
+function clearHintDisplay() {
+    document.getElementById('hint-display').textContent = '';
 }
 
 function skipImage() {
-    if (timeLeft <= 0 && score >= 50) {
+    if (score >= 50) {
         score -= 50;
-        document.getElementById('score-value').textContent = score;
+        updateScore();
         loadRandomImage();
-        updateSkipButtonVisibility();
+        clearHintDisplay();
+        showCustomAlert('עברת לתמונה הבאה');
+    }
+}
+
+// ניהול ניקוד וזמן
+function calculateScore(timeLeft) {
+    let finalScore = 100; // ניקוד בסיסי
+    
+    finalScore += timeLeft; // בונוס זמן
+    
+    if (hintsUsed.easy) finalScore -= 20;
+    if (hintsUsed.hard) finalScore -= 10;
+    finalScore -= hintsUsed.letter * 15;
+    
+    if (currentStreak % 5 === 0 && currentStreak > 0) finalScore += 10; // בונוס רצף
+    
+    return Math.max(finalScore, 0);
+}
+
+function startTimer() {
+    clearInterval(timer);
+    timeLeft = 60;
+    updateTimerDisplay();
+    timer = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+        }
         saveGameState();
-    } else {
-        showCustomAlert('אין אפשרות לדלג על תמונה זו כעת');
-    }
+    }, 1000);
 }
 
-function updateSkipButtonVisibility() {
-    const skipButton = document.getElementById('skip-image');
-    if (timeLeft <= 0 && score >= 50) {
-        skipButton.style.display = 'inline-block';
-    } else {
-        skipButton.style.display = 'none';
-    }
+function stopTimer() {
+    clearInterval(timer);
 }
 
+function updateTimerDisplay() {
+    document.getElementById('timer').textContent = timeLeft;
+}
+
+function updateScore() {
+    document.getElementById('score-value').textContent = score;
+    updateHintButtons(); // עדכון מצב הכפתורים בכל שינוי בניקוד
+}
+
+function updateImageCounter() {
+    // התאמת המונה כך שיתחיל מ-1 ויסתיים במספר האמיתי של התמונות
+    document.getElementById('image-counter').textContent = `תמונה ${usedImages.size} מתוך ${gameData.length}`;
+}
+
+// סיום משחק
 function endGame() {
     clearInterval(timer);
     document.getElementById('game-screen').style.display = 'none';
     document.getElementById('end-screen').style.display = 'block';
     
     document.getElementById('final-score').textContent = score;
-    document.getElementById('hints-used').textContent = hintsUsed;
-    const averageTime = (totalTime / usedImages.size).toFixed(2);
+    document.getElementById('hints-used').textContent = hintsUsed.easy + hintsUsed.hard + hintsUsed.letter;
+    // שימוש ב-gameData.length במקום usedImages.size לחישוב הזמן הממוצע
+    const averageTime = (totalTime / gameData.length).toFixed(2);
     document.getElementById('average-time').textContent = averageTime;
     
     backgroundMusic.pause();
@@ -337,14 +425,16 @@ function endGame() {
 function resetGame() {
     currentImageIndex = 0;
     score = 0;
-    hintsUsed = 0;
+    hintsUsed = { easy: false, hard: false, letter: 0 };
     totalTime = 0;
     usedImages.clear();
     copyrightClickCount = 0;
     bonusAwarded = false;
+    currentStreak = 0;
     document.getElementById('score-value').textContent = score;
     document.getElementById('end-screen').style.display = 'none';
     document.getElementById('welcome-screen').style.display = 'block';
+    clearHintDisplay(); // ניקוי תצוגת הרמז
     clearGameState();
     playBackgroundMusic();
 }
@@ -356,21 +446,7 @@ function confirmResetGame() {
     }
 }
 
-function toggleTheme() {
-    isDarkMode = !isDarkMode;
-    document.body.classList.toggle('dark-mode', isDarkMode);
-    localStorage.setItem('darkMode', isDarkMode);
-    document.getElementById('theme-toggle').textContent = isDarkMode ? 'מצב בהיר' : 'מצב כהה';
-}
-
-function checkSavedTheme() {
-    const savedDarkMode = localStorage.getItem('darkMode');
-    if (savedDarkMode !== null) {
-        isDarkMode = JSON.parse(savedDarkMode);
-        document.body.classList.toggle('dark-mode', isDarkMode);
-    }
-}
-
+// ניהול מצב משחק
 function saveGameState() {
     const gameState = {
         currentImageIndex,
@@ -384,7 +460,8 @@ function saveGameState() {
         isDarkMode,
         isMuted,
         copyrightClickCount,
-        bonusAwarded
+        bonusAwarded,
+        currentStreak
     };
     localStorage.setItem('gameState', JSON.stringify(gameState));
 }
@@ -404,10 +481,10 @@ function loadGameState() {
         isMuted = gameState.isMuted;
         copyrightClickCount = gameState.copyrightClickCount || 0;
         bonusAwarded = gameState.bonusAwarded || false;
+        currentStreak = gameState.currentStreak || 0;
 
         timeLeft = 0;
         updateTimerDisplay();
-        updateSkipButtonVisibility();
         
         document.getElementById('score-value').textContent = score;
         if (usedImages.size > 0) {
@@ -424,9 +501,10 @@ function loadGameState() {
         document.getElementById('mute-toggle').textContent = isMuted ? 'הפעל מוזיקה' : 'השתק מוזיקה';
         document.getElementById('theme-toggle').textContent = isDarkMode ? 'מצב בהיר' : 'מצב כהה';
         
-        playBackgroundMusic(); // הפעלה אוטומטית של המוזיקה
+        playBackgroundMusic();
     } else {
-        playBackgroundMusic(); // הפעלה אוטומטית גם אם אין מצב שמור
+        playBackgroundMusic();
+        updateHintButtons();
     }
 }
 
@@ -434,6 +512,52 @@ function clearGameState() {
     localStorage.removeItem('gameState');
 }
 
+// ניהול מוזיקת רקע
+function initBackgroundMusic() {
+    backgroundMusic = document.getElementById('background-music');
+    backgroundMusic.volume = 0.5;
+    playBackgroundMusic();
+}
+
+function playBackgroundMusic() {
+    if (!isMuted) {
+        backgroundMusic.play().catch(e => {
+            console.error("Error playing audio:", e);
+            document.addEventListener('click', function playOnClick() {
+                backgroundMusic.play();
+                document.removeEventListener('click', playOnClick);
+            }, { once: true });
+        });
+    }
+}
+
+function toggleMute() {
+    isMuted = !isMuted;
+    backgroundMusic.muted = isMuted;
+    document.getElementById('mute-toggle').textContent = isMuted ? 'הפעל מוזיקה' : 'השתק מוזיקה';
+    if (!isMuted) {
+        playBackgroundMusic();
+    }
+    saveGameState();
+}
+
+// ניהול ערכת נושא
+function toggleTheme() {
+    isDarkMode = !isDarkMode;
+    document.body.classList.toggle('dark-mode', isDarkMode);
+    localStorage.setItem('darkMode', isDarkMode);
+    document.getElementById('theme-toggle').textContent = isDarkMode ? 'מצב בהיר' : 'מצב כהה';
+}
+
+function checkSavedTheme() {
+    const savedDarkMode = localStorage.getItem('darkMode');
+    if (savedDarkMode !== null) {
+        isDarkMode = JSON.parse(savedDarkMode);
+        document.body.classList.toggle('dark-mode', isDarkMode);
+    }
+}
+
+// ניהול מודל זכויות יוצרים
 function initializeCopyrightModal() {
     const modal = document.getElementById('copyright-modal');
     const btn = document.getElementById('copyright-info');
@@ -458,15 +582,21 @@ function initializeCopyrightModal() {
 
 function checkSecretBonus() {
     if (copyrightClickCount === 10 && !bonusAwarded) {
-        score += 1000;
+        score += 500;
         document.getElementById('score-value').textContent = score;
-        showCustomAlert('<strong style="font-size: 28px;">בונוס סודי!</strong><br>גילית את הבונוס הנסתר!<br>קיבלת 1000 נקודות בונוס!');
+        showCustomAlert(`
+            <strong style="font-size: 24px;">🎉 בונוס מסתורי נחשף! 🎉</strong><br><br>
+            גילית סוד נסתר במשחק!<br>
+            הסקרנות שלך השתלמה...<br><br>
+            <span style="font-size: 20px;">קיבלת 500 נקודות בונוס!</span><br><br>
+            המשך לחקור, אולי יש עוד הפתעות...
+        `);
         bonusAwarded = true;
-        updateSkipButtonVisibility();
         saveGameState();
     }
 }
 
+// התראות מותאמות אישית
 function showCustomAlert(message) {
     document.getElementById('custom-alert-message').innerHTML = message;
     document.getElementById('custom-alert').style.display = 'block';
@@ -476,4 +606,5 @@ function closeCustomAlert() {
     document.getElementById('custom-alert').style.display = 'none';
 }
 
+// אתחול המשחק
 window.addEventListener('load', loadGameData);

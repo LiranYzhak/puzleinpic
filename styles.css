@@ -37,7 +37,6 @@ body {
     direction: rtl;
     color: var(--text-color);
     transition: background-color 0.3s, color 0.3s;
-    /* padding: 20px; */
 }
 
 #banner-container {
@@ -61,6 +60,7 @@ body {
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     width: 100%;
+    max-width: 540px;
     position: relative;
     margin: 0 auto;
 }
@@ -79,7 +79,7 @@ body {
 
 #current-image {
     max-width: 100%;
-    max-height: 100%;
+    max-height: 300px;
     height: auto;
     border-radius: 10px;
     margin-bottom: 20px;
@@ -121,19 +121,6 @@ body {
     font-size: 18px;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.3s ease;
-    opacity: 1;
-    transform: scale(1);
-}
-
-.letter-box.adding {
-    opacity: 0;
-    transform: scale(0.5);
-}
-
-.letter-box.removing {
-    opacity: 0;
-    transform: scale(0.5);
 }
 
 .correct-answer {
@@ -148,28 +135,69 @@ body {
     color: white;
 }
 
-#game-controls {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
+#hint-button {
     margin-top: 20px;
-}
-
-#game-controls button {
-    padding: 8px 12px;
-    font-size: 12px;
-    cursor: pointer;
+    padding: 10px 20px;
+    font-size: 16px;
     background-color: var(--button-bg);
     color: white;
     border: none;
     border-radius: 5px;
-    flex-grow: 1;
-    max-width: 150px;
+    cursor: pointer;
 }
 
-#game-controls button:hover {
+#hint-button:hover {
     background-color: var(--button-hover);
+}
+
+#hint-menu {
+    position: absolute;
+    background-color: var(--container-bg);
+    border: 2px solid var(--button-bg);
+    border-radius: 10px;
+    padding: 15px;
+    z-index: 1500;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    display: none;
+    min-width: 200px;
+    text-align: center;
+}
+
+#hint-menu button {
+    display: block;
+    width: 100%;
+    padding: 10px 15px;
+    margin: 8px 0;
+    font-size: 16px;
+    text-align: center;
+    background-color: var(--button-bg);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#hint-menu button:hover {
+    background-color: var(--button-hover);
+}
+
+#hint-menu button:disabled {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+}
+
+#hint-menu button:disabled:hover {
+    background-color: #cccccc;
+}
+
+#hint-display {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: var(--bg-color);
+    border-radius: 5px;
+    font-style: italic;
 }
 
 button {
@@ -182,7 +210,6 @@ button {
     border-radius: 5px;
     margin: 5px;
     font-family: "Varela Round", sans-serif;
-
 }
 
 button:hover {
@@ -310,19 +337,10 @@ button:hover {
     cursor: pointer;
 }
 
-
 @keyframes rainbow {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 h1 {
@@ -342,8 +360,8 @@ h1 {
 }
 
 .custom-alert-content {
-    /* background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet); */
-    color: white;
+    background-color: var(--container-bg);
+    color: var(--text-color);
     margin: 15% auto;
     padding: 20px;
     border: 1px solid #888;
@@ -357,12 +375,11 @@ h1 {
 
 .custom-alert-content p {
     margin-bottom: 20px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
 }
 
 .custom-alert-content button {
-    background-color: white;
-    color: #333;
+    background-color: var(--button-bg);
+    color: white;
     border: none;
     padding: 10px 20px;
     margin-top: 15px;
@@ -373,44 +390,58 @@ h1 {
 }
 
 .custom-alert-content button:hover {
-    background-color: #f0f0f0;
+    background-color: var(--button-hover);
     transform: scale(1.05);
 }
 
-
-
-@media (min-width: 540px) {
+@media (max-width: 540px) {
     #game-container {
-        max-width: 540px;
-        padding: 40px;
+        width: 90%;
+        padding: 10px;
     }
 
     #current-image {
-        max-height: 300px;
-
+        max-height: 250px;
     }
 
-
-
     button {
-        font-size: 16px;
-        padding: 10px 20px;
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+
+    .letter-box {
+        width: 25px;
+        height: 25px;
+        font-size: 14px;
     }
 
     h1 {
-        font-size: 2em;
+        font-size: 1.5em;
     }
 
     #timer {
-        font-size: 24px;
+        font-size: 20px;
     }
 
     #image-counter {
-        font-size: 16px;
+        font-size: 14px;
+    }
+
+    #hint-menu button {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+}
+
+@media (max-width: 400px) {
+    .letter-box {
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
     }
 
     #game-controls button {
-        font-size: 14px;
-        padding: 10px 15px;
+        font-size: 11px;
+        padding: 6px 10px;
     }
 }

@@ -1,31 +1,26 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>חידתמונה</title>
     <link rel="stylesheet" href="styles.css">
-    <!-- google font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
-
+    
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://liranyzhak.github.io/puzzleinpic/">
     <meta property="og:title" content="חידתמונה - משחק ניחושים מאתגר">
     <meta property="og:description" content="בואו לנחש ביטויים והגיגים לשוניים מאחורי תמונות מסקרנות!">
-    <meta property="og:image" content="https://liranyzhak.github.io/puzzleinpic/banner-link.png">
+    <meta property="og:image" content="https://liranyzhak.github.io/puzzleinpic/banner.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://liranyzhak.github.io/puzzleinpic/">
     <meta property="twitter:title" content="חידתמונה - משחק ניחושים מאתגר">
     <meta property="twitter:description" content="בואו לנחש ביטויים והגיגים לשוניים מאחורי תמונות מסקרנות!">
-    <meta property="twitter:image" content="https://liranyzhak.github.io/puzzleinpic/banner-link.png">
+    <meta property="twitter:image" content="https://liranyzhak.github.io/puzzleinpic/banner.png">
 </head>
-
 <body>
     <div id="banner-container">
         <img src="banner.png" alt="Banner" id="banner-image">
@@ -33,11 +28,10 @@
 
     <div id="game-container">
         <div id="welcome-screen">
-            <h1>ברוכים הבאים למשחק חידתמונה</h1>
-            <p class="sub-title">המשחק שבו תצטרכו לנחש מה הביטוי או ההגיג הלשוני המסתתרים מאחורי התמונה</p>
+            <h1>ברוכים הבאים למשחק <span class="highlight">חידתמונה</span></h1>
+            <p>המשחק שבו תצטרכו לנחש מה הביטוי או ההגיג הלשוני המסתתרים מאחורי התמונה</p>
             <div class="rules">
-                <p>פתרון חידה יזכה אותך ב-100 נקודות, פתרון חידה בזמן הקצוב יוסיף למאזנך עוד 50 נקודות. חשיפת אות אחת
-                    מהתשובה תפחית מהמאזן 50 נקודות. דילוג על תמונה יפחית מהמאזן 50 נקודות.</p>
+                <p>פתרון חידה יזכה אותך ב-100 נקודות, פתרון חידה בזמן הקצוב יוסיף למאזנך עוד 50 נקודות. שימוש ברמזים יפחית מהמאזן בהתאם לסוג הרמז.</p>
             </div>
             <button id="start-game">התחל</button>
         </div>
@@ -48,10 +42,14 @@
             <img id="current-image" src="" alt="תמונת חידה">
             <div id="guess-container"></div>
             <div id="letters-container"></div>
-            <div id="game-controls">
-                <button id="reveal-letter">חשוף אות</button>
-                <button id="skip-image">דלג על תמונה זו</button>
+            <button id="hint-button">תן לי רמז</button>
+            <div id="hint-menu" style="display: none;">
+                <button id="easy-hint">רמז קל (20-)</button>
+                <button id="hard-hint">רמז קשה (10-)</button>
+                <button id="letter-hint">חשוף אות (15-)</button>
+                <button id="skip-image">דלג על תמונה (50-)</button>
             </div>
+            <div id="hint-display"></div>
             <div id="score">ניקוד: <span id="score-value">0</span></div>
         </div>
 
@@ -81,20 +79,18 @@
         </div>
     </div>
 
-    <div id="copyright-modal" class="modal" style="display: none;">
+    <div id="copyright-modal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>הצהרת זכויות יוצרים</h2>
             <p>© 2024 לירן יצחק. כל הזכויות שמורות.</p>
-            <p>משחק זה, לרבות כל התוכן, העיצוב, הקוד, התמונות והטקסטים הכלולים בו, מוגן על ידי חוקי זכויות יוצרים וקניין
-                רוחני בינלאומיים ומקומיים.</p>
-            <p>כל שימוש, העתקה, שינוי, הפצה או ניצול מסחרי של תוכן זה, באופן מלא או חלקי, ללא אישור מפורש בכתב מאת לירן
-                יצחק, אסור בהחלט.</p>
+            <p>משחק זה, לרבות כל התוכן, העיצוב, הקוד, התמונות והטקסטים הכלולים בו, מוגן על ידי חוקי זכויות יוצרים וקניין רוחני בינלאומיים ומקומיים.</p>
+            <p>כל שימוש, העתקה, שינוי, הפצה או ניצול מסחרי של תוכן זה, באופן מלא או חלקי, ללא אישור מפורש בכתב מאת לירן יצחק, אסור בהחלט.</p>
             <p>לשאלות או בקשות הנוגעות לזכויות יוצרים, אנא צרו קשר עם הבעלים בכתובת: liranics@gmail.com</p>
         </div>
     </div>
 
-    <div id="custom-alert" class="custom-alert" style="display: none;">
+    <div id="custom-alert" class="custom-alert">
         <div class="custom-alert-content">
             <p id="custom-alert-message"></p>
             <button onclick="closeCustomAlert()">אישור</button>
@@ -108,5 +104,4 @@
 
     <script src="game.js"></script>
 </body>
-
 </html>
