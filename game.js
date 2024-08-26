@@ -8,7 +8,7 @@ let availableLetters = [];
 let usedImages = new Set();
 let timer;
 let timeLeft;
-let hintsUsed = { easy: false, hard: false, letter: 0 };
+let hintsUsed = { easy: 0, hard: 0, letter: 0 };
 let totalTime = 0;
 let isDarkMode = false;
 let isMuted = false;
@@ -240,18 +240,20 @@ function toggleHintMenu(event) {
         if (menuRect.top < gameRect.top) {
             hintMenu.style.top = '0px';
         }
+
+        document.addEventListener('click', closeHintMenu);
     } else {
-        hintMenu.style.display = 'none';
+        closeHintMenu();
     }
     
     event.stopPropagation();
-    document.addEventListener('click', closeHintMenu);
 }
 
 function closeHintMenu(event) {
     const hintMenu = document.getElementById('hint-menu');
     const hintButton = document.getElementById('hint-button');
-    if (!hintMenu.contains(event.target) && event.target !== hintButton) {
+
+    if (!event || (!hintMenu.contains(event.target) && event.target !== hintButton)) {
         hintMenu.style.display = 'none';
         document.removeEventListener('click', closeHintMenu);
     }
@@ -266,13 +268,13 @@ function getHint(hintType) {
             if (hintsUsed.easy || score < 20) return;
             cost = 20;
             hint = gameData[currentImageIndex].easyHint;
-            hintsUsed.easy = true;
+            hintsUsed.easy++;
             break;
         case 'hard':
             if (hintsUsed.hard || score < 10) return;
             cost = 10;
             hint = gameData[currentImageIndex].hardHint;
-            hintsUsed.hard = true;
+            hintsUsed.hard++;
             break;
         case 'letter':
             if (score < 15) return;
@@ -335,8 +337,8 @@ function updateHintButtons() {
 }
 
 function resetHints() {
-    hintsUsed.easy = false;
-    hintsUsed.hard = false;
+    hintsUsed.easy = 0;
+    hintsUsed.hard = 0;
     hintsUsed.letter = 0;
     updateHintButtons();
 }
@@ -400,7 +402,10 @@ function endGame() {
     document.getElementById('end-screen').style.display = 'block';
     
     document.getElementById('final-score').textContent = score;
-    document.getElementById('hints-used').textContent = hintsUsed.easy + hintsUsed.hard + hintsUsed.letter;
+    
+    const totalHintsUsed = hintsUsed.easy + hintsUsed.hard + hintsUsed.letter;
+    document.getElementById('hints-used').textContent = totalHintsUsed;
+    
     const averageTime = (totalTime / gameData.length).toFixed(2);
     document.getElementById('average-time').textContent = averageTime;
     
@@ -412,7 +417,7 @@ function endGame() {
 function resetGame() {
     currentImageIndex = 0;
     score = 100;
-    hintsUsed = { easy: false, hard: false, letter: 0 };
+    hintsUsed = { easy: 0, hard: 0, letter: 0 };
     totalTime = 0;
     usedImages.clear();
     copyrightClickCount = 0;
