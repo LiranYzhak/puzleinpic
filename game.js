@@ -9,6 +9,7 @@ let usedImages = new Set();
 let timer;
 let timeLeft;
 let hintsUsed = { easy: 0, hard: 0, letter: 0 };
+let totalHintsUsed = { easy: 0, hard: 0, letter: 0 };
 let totalTime = 0;
 let isDarkMode = false;
 let isMuted = false;
@@ -93,15 +94,15 @@ function loadRandomImage() {
         endGame();
         return;
     }
-    
+
     let randomIndex;
     do {
         randomIndex = Math.floor(Math.random() * gameData.length);
     } while (usedImages.has(randomIndex));
-    
+
     usedImages.add(randomIndex);
     currentImageIndex = randomIndex;
-    
+
     const imageData = gameData[currentImageIndex];
     document.getElementById('current-image').src = imageData.image;
     currentPhrase = imageData.phrase.replace(/\s+/g, '');
@@ -269,18 +270,21 @@ function getHint(hintType) {
             cost = 20;
             hint = gameData[currentImageIndex].easyHint;
             hintsUsed.easy++;
+            totalHintsUsed.easy++;
             break;
         case 'hard':
             if (hintsUsed.hard || score < 10) return;
             cost = 10;
             hint = gameData[currentImageIndex].hardHint;
             hintsUsed.hard++;
+            totalHintsUsed.hard++;
             break;
         case 'letter':
             if (score < 15) return;
             cost = 15;
             hint = revealRandomLetter();
             hintsUsed.letter++;
+            totalHintsUsed.letter++;
             break;
         case 'skip':
             if (score < 50) return;
@@ -294,6 +298,7 @@ function getHint(hintType) {
     showHint(hint);
     updateHintButtons();
     closeHintMenu();
+    saveGameState();
 }
 
 function revealRandomLetter() {
@@ -337,9 +342,7 @@ function updateHintButtons() {
 }
 
 function resetHints() {
-    hintsUsed.easy = 0;
-    hintsUsed.hard = 0;
-    hintsUsed.letter = 0;
+    hintsUsed = { easy: 0, hard: 0, letter: 0 };
     updateHintButtons();
 }
 
@@ -403,8 +406,8 @@ function endGame() {
     
     document.getElementById('final-score').textContent = score;
     
-    const totalHintsUsed = hintsUsed.easy + hintsUsed.hard + hintsUsed.letter;
-    document.getElementById('hints-used').textContent = totalHintsUsed;
+    const totalHints = totalHintsUsed.easy + totalHintsUsed.hard + totalHintsUsed.letter;
+    document.getElementById('hints-used').textContent = totalHints;
     
     const averageTime = (totalTime / gameData.length).toFixed(2);
     document.getElementById('average-time').textContent = averageTime;
@@ -418,6 +421,7 @@ function resetGame() {
     currentImageIndex = 0;
     score = 100;
     hintsUsed = { easy: 0, hard: 0, letter: 0 };
+    totalHintsUsed = { easy: 0, hard: 0, letter: 0 };
     totalTime = 0;
     usedImages.clear();
     copyrightClickCount = 0;
@@ -447,6 +451,7 @@ function saveGameState() {
         usedImages: Array.from(usedImages),
         timeLeft,
         hintsUsed,
+        totalHintsUsed,
         totalTime,
         isDarkMode,
         isMuted,
@@ -466,6 +471,7 @@ function loadGameState() {
         score = gameState.score;
         usedImages = new Set(gameState.usedImages);
         hintsUsed = gameState.hintsUsed;
+        totalHintsUsed = gameState.totalHintsUsed || { easy: 0, hard: 0, letter: 0 };
         totalTime = gameState.totalTime;
         isDarkMode = gameState.isDarkMode;
         isMuted = gameState.isMuted;
